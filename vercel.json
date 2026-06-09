@@ -1,0 +1,1 @@
+{"rewrites":[{"source":"/functions/v1/app/:path*","destination":"https://ldwrbkatgwnhsgrqwnwa.supabase.co/functions/v1/app/:path*"},{"source":"/:path*","destination":"https://ldwrbkatgwnhsgrqwnwa.supabase.co/functions/v1/app/:path*"}]}
