@@ -7,5 +7,11 @@
     { "source": "/success", "destination": "https://ldwrbkatgwnhsgrqwnwa.supabase.co/functions/v1/app/success" },
     { "source": "/api/(.*)", "destination": "https://ldwrbkatgwnhsgrqwnwa.supabase.co/functions/v1/app/api/$1" },
     { "source": "/functions/v1/app/(.*)", "destination": "https://ldwrbkatgwnhsgrqwnwa.supabase.co/functions/v1/app/$1" }
+  ],
+  "headers": [
+    { "source": "/(admin|employee|platform|success)", "headers": [
+      { "key": "Content-Type", "value": "text/html; charset=utf-8" },
+      { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self' data:" }
+    ]}
   ]
 }
