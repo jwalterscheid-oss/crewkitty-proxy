@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CrewKitty Wallet</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; background: #f4f6f8; color: #1a1a2e; }
+  .wrap { max-width: 480px; margin: 40px auto; padding: 0 16px; }
+  h1 { font-size: 1.5rem; margin-bottom: 16px; }
+  .card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,.08); margin-bottom: 20px; }
+  label { display: block; font-weight: 600; margin: 12px 0 6px; font-size: .9rem; }
+  select, input { width: 100%; padding: 12px; border: 1px solid #d0d5dd; border-radius: 8px; font-size: 1rem; }
+  button { width: 100%; margin-top: 20px; padding: 13px; background: #635bff; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+  button:disabled { background: #aaa; }
+  .balance { font-size: 2.2rem; font-weight: 700; }
+  .bal-label { color: #666; font-size: .85rem; }
+  .err { color: #c0392b; margin-top: 12px; font-size: .9rem; }
+  .ok { color: #065f46; margin-top: 12px; font-size: .9rem; }
+  .tx { border-bottom: 1px solid #eee; padding: 8px 0; font-size: .85rem; display: flex; justify-content: space-between; }
+  .tx small { color: #888; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>CrewKitty Wallet</h1>
+
+  <div class="card" id="login">
+    <label>Your name</label>
+    <input id="name" placeholder="John Smith">
+    <label>PIN</label>
+    <input id="pin" type="password" inputmode="numeric" placeholder="4-6 digits">
+    <button onclick="doLogin()">Sign in</button>
+    <div class="err" id="loginErr"></div>
+  </div>
+
+  <div id="wallet" style="display:none">
+    <div class="card">
+      <div class="bal-label">Available balance</div>
+      <div class="balance" id="bal">$0.00</div>
+      <div class="bal-label" id="cardline"></div>
+    </div>
+    <div class="card">
+      <label>Pay business</label>
+      <select id="merchant"></select>
+      <label>Amount (USD)</label>
+      <input id="amount" type="number" min="0.50" step="0.01" placeholder="100.00">
+      <label>What's it for? (optional)</label>
+      <input id="desc" placeholder="Parts, fuel, service call...">
+      <button id="payBtn" onclick="pay()">Pay from balance</button>
+      <div class="err" id="payErr"></div>
+      <div class="ok" id="payOk"></div>
+    </div>
+    <div class="card">
+      <label>Your card works at these businesses</label>
+      <div id="cardMerchants" class="bal-label">Loading...</div>
+    </div>
+    <div class="card">
+      <label>Recent activity</label>
+      <div id="txs"></div>
+    </div>
+  </div>
+</div>
+<script>
+const P='/functions/v1/app';
+let EID = '', PIN = '', CID = '';
+const H = () => ({ 'Content-Type': 'application/json', 'x-employee-id': EID, 'x-employee-pin': PIN });
+const fmt = c => '$' + (c/100).toFixed(2);
+
+async function doLogin() {
+  const res = await fetch(P+'/api/employee/login', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: document.getElementById('name').value, pin: document.getElementById('pin').value })
+  });
+  const data = await res.json();
+  if (!res.ok) { document.getElementById('loginErr').textContent = data.error || 'Login failed'; return; }
+  EID = data.id; PIN = document.getElementById('pin').value; CID = data.companyId || '';
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('wallet').style.display = 'block';
+  await loadMerchants();
+  loadCardMerchants();
+  refresh(data);
+}
+
+async function loadCardMerchants() {
+  const res = await fetch(P+'/api/card-merchants?c='+encodeURIComponent(CID));
+  const list = await res.json();
+  document.getElementById('cardMerchants').textContent = list.length ? list.map(m => m.businessName).join(', ') : 'None approved yet';
+}
+
+async function loadMerchants() {
+  const res = await fetch(P+'/api/merchants?c='+encodeURIComponent(CID));
+  const list = await res.json();
+  const sel = document.getElementById('merchant');
+  sel.innerHTML = '';
+  list.forEach(m => { const o = document.createElement('option'); o.value = m.id; o.textContent = m.businessName; sel.appendChild(o); });
+  sel.closest('.card').style.display = list.length ? 'block' : 'none';
+}
+
+function refresh(data) {
+  document.getElementById('bal').textContent = fmt(data.balanceCents);
+  document.getElementById('cardline').textContent = data.cardLast4 ? 'Company card \u2022\u2022\u2022\u2022 ' + data.cardLast4 : 'No card issued yet \u2014 ask your admin';
+  const txs = document.getElementById('txs');
+  txs.innerHTML = '';
+  (data.transactions || []).forEach(t => {
+    const d = document.createElement('div');
+    d.className = 'tx';
+    const sign = t.type === 'payment' ? '-' : (t.type === 'declined' ? '\u26d4 ' : '+');
+    d.innerHTML = `<span>${t.merchantName || t.type}${t.description ? ' — ' + t.description : ''}<br><small>${new Date(t.createdAt).toLocaleString()}</small></span><strong>${sign}${fmt(t.amountCents)}</strong>`;
+    txs.appendChild(d);
+  });
+}
+
+async function me() {
+  const res = await fetch(P+'/api/employee/me', { headers: H() });
+  if (res.ok) refresh(await res.json());
+}
+
+async function pay() {
+  const btn = document.getElementById('payBtn');
+  const err = document.getElementById('payErr'), ok = document.getElementById('payOk');
+  err.textContent = ''; ok.textContent = ''; btn.disabled = true;
+  const res = await fetch(P+'/api/employee/pay', {
+    method: 'POST', headers: H(),
+    body: JSON.stringify({
+      merchantId: document.getElementById('merchant').value,
+      amount: document.getElementById('amount').value,
+      description: document.getElementById('desc').value
+    })
+  });
+  const data = await res.json();
+  btn.disabled = false;
+  if (!res.ok) { err.textContent = data.error || 'Payment failed'; return; }
+  ok.textContent = 'Paid! New balance: ' + fmt(data.balanceCents);
+  document.getElementById('amount').value = ''; document.getElementById('desc').value = '';
+  me();
+}
+</script>
+</body>
+</html>

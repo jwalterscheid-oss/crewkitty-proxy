@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CrewKitty — Company Console</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; background: #f4f6f8; color: #1a1a2e; }
+  .wrap { max-width: 760px; margin: 40px auto; padding: 0 16px; }
+  h1 { font-size: 1.5rem; margin-bottom: 16px; }
+  .card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,.08); margin-bottom: 20px; }
+  label { display: block; font-weight: 600; margin: 12px 0 6px; font-size: .9rem; }
+  input, select { width: 100%; padding: 10px; border: 1px solid #d0d5dd; border-radius: 8px; font-size: 1rem; }
+  button { padding: 10px 16px; background: #635bff; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 14px; }
+  button.small { padding: 6px 10px; font-size: .8rem; margin: 0 4px 0 0; }
+  button.danger { background: #e74c3c; }
+  button.gray { background: #6b7280; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #eee; font-size: .9rem; }
+  .badge { padding: 2px 8px; border-radius: 10px; font-size: .75rem; font-weight: 600; }
+  .on { background: #d1fae5; color: #065f46; }
+  .off { background: #fee2e2; color: #991b1b; }
+  .pend { background: #fef3c7; color: #92400e; }
+  .msg { margin-top: 12px; font-size: .9rem; word-break: break-all; }
+  .msg a { color: #635bff; }
+  .err { color: #c0392b; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="title">CrewKitty</h1>
+
+  <div class="card" id="login">
+    <h2 style="font-size:1.1rem">Sign in to your company</h2>
+    <label>Email</label>
+    <input id="lemail" type="email" placeholder="you@yourcompany.com">
+    <label>Password</label>
+    <input id="lpw" type="password">
+    <button onclick="unlock()">Sign in</button>
+    <div class="msg err" id="loginErr"></div>
+  </div>
+
+  <div class="card" id="signup">
+    <h2 style="font-size:1.1rem">New to CrewKitty? Create a free company account</h2>
+    <label>Company name</label>
+    <input id="sname" placeholder="Your Company LLC">
+    <label>Email</label>
+    <input id="semail" type="email" placeholder="you@yourcompany.com">
+    <label>Password</label>
+    <input id="spw" type="password" placeholder="8+ characters">
+    <button onclick="signup()">Create account</button>
+    <div class="msg" id="signupMsg"></div>
+  </div>
+
+  <div id="panel" style="display:none">
+    <div class="card">
+      <h2 style="font-size:1.1rem">Add a business</h2>
+      <label>Business name</label>
+      <input id="bn" placeholder="Acme Well Service LLC">
+      <label>How will they get paid?</label>
+      <select id="bk">
+        <option value="card">Card allowlist — employees pay with company card at their machine (no bank details needed)</option>
+        <option value="connect">Stripe onboarding — receive in-app payments (they connect their own bank)</option>
+      </select>
+      <label>Contact email (optional — used for Stripe onboarding)</label>
+      <input id="em" type="email" placeholder="owner@acme.com">
+      <button onclick="addMerchant()">Add business</button>
+      <div class="msg" id="addMsg"></div>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:1.1rem">Employees (pre-funded balances)</h2>
+      <label>Name</label>
+      <input id="en" placeholder="John Smith">
+      <label>PIN (4-6 digits, employee uses it to sign in)</label>
+      <input id="ep" inputmode="numeric" placeholder="1234">
+      <label>Initial funds (USD, optional)</label>
+      <input id="ef" type="number" min="0" step="0.01" placeholder="500.00">
+      <button onclick="addEmployee()">Add employee &amp; issue card</button>
+      <div class="msg" id="empMsg"></div>
+      <table>
+        <thead><tr><th>Employee</th><th>Card</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="erows"></tbody>
+      </table>
+      <div class="msg">Employees sign in at <a href="/employee" target="_blank">the wallet page</a> with their name + PIN.</div>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:1.1rem">Businesses</h2>
+      <table>
+        <thead><tr><th>Business</th><th>Status</th><th>Stripe onboarding</th><th>Actions</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script>
+const P='/functions/v1/app';
+let EM = '', PW = '';
+const H = () => ({ 'Content-Type': 'application/json', 'x-company-email': EM, 'x-company-password': PW });
+
+async function unlock() {
+  EM = document.getElementById('lemail').value;
+  PW = document.getElementById('lpw').value;
+  const res = await fetch(P+'/api/company/login', { method: 'POST', headers: H() });
+  const data = await res.json();
+  if (!res.ok) { document.getElementById('loginErr').textContent = data.error || 'Sign-in failed'; return; }
+  document.getElementById('title').textContent = data.name;
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('signup').style.display = 'none';
+  document.getElementById('panel').style.display = 'block';
+  refresh();
+  refreshEmployees();
+}
+
+async function signup() {
+  const msg = document.getElementById('signupMsg');
+  msg.textContent = 'Creating...';
+  const res = await fetch(P+'/api/signup', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      companyName: document.getElementById('sname').value,
+      email: document.getElementById('semail').value,
+      password: document.getElementById('spw').value
+    })
+  });
+  const data = await res.json();
+  if (!res.ok) { msg.innerHTML = `<span class="err">${esc(data.error)}</span>`; return; }
+  msg.textContent = 'Account created! Sign in above with your email and password.';
+}
+
+async function refresh() {
+  const res = await fetch(P+'/api/admin/merchants', { headers: H() });
+  render(await res.json());
+}
+
+function render(list) {
+  const tb = document.getElementById('rows');
+  tb.innerHTML = '';
+  list.forEach(m => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${esc(m.businessName)}</strong><br><small>${esc(m.email || '')}</small></td>
+      <td><span class="badge ${m.active ? 'on' : 'off'}">${m.active ? 'Active' : 'Disabled'}</span></td>
+      <td>${m.kind === 'card' ? '<span class="badge on">Card allowlist</span>' : `<span class="badge ${m.onboarded ? 'on' : 'pend'}">${m.onboarded ? 'Complete' : 'Pending'}</span>`}</td>
+      <td>
+        <button class="small gray" onclick="toggle('${m.id}', ${!m.active})">${m.active ? 'Disable' : 'Enable'}</button>
+        ${m.kind !== 'card' && !m.onboarded ? `<button class="small" onclick="link('${m.id}')">Onboard link</button>
+        <button class="small gray" onclick="check('${m.id}')">Check status</button>` : ''}
+        <button class="small danger" onclick="del('${m.id}')">Remove</button>
+      </td>`;
+    tb.appendChild(tr);
+  });
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+async function addMerchant() {
+  const msg = document.getElementById('addMsg');
+  msg.textContent = 'Creating…';
+  const res = await fetch(P+'/api/admin/merchants', {
+    method: 'POST', headers: H(),
+    body: JSON.stringify({ businessName: document.getElementById('bn').value, email: document.getElementById('em').value, kind: document.getElementById('bk').value })
+  });
+  const data = await res.json();
+  if (!res.ok) { msg.innerHTML = `<span class="err">${esc(data.error)}</span>`; return; }
+  msg.innerHTML = data.onboardingUrl
+    ? `Added. Send this onboarding link to the business so they can connect their bank account:<br><a href="${data.onboardingUrl}" target="_blank">${data.onboardingUrl}</a>`
+    : 'Added to the card allowlist. Employee cards now work at this business.';
+  document.getElementById('bn').value = ''; document.getElementById('em').value = '';
+  refresh();
+}
+
+async function link(id) {
+  const res = await fetch(`${P}/api/admin/merchants/${id}/onboarding-link`, { method: 'POST', headers: H() });
+  const data = await res.json();
+  if (data.onboardingUrl) prompt('Copy this onboarding link and send it to the business:', data.onboardingUrl);
+  else alert(data.error || 'Error');
+}
+
+async function check(id) {
+  await fetch(`${P}/api/admin/merchants/${id}/refresh-status`, { method: 'POST', headers: H() });
+  refresh();
+}
+
+async function toggle(id, active) {
+  await fetch(`${P}/api/admin/merchants/${id}`, { method: 'PATCH', headers: H(), body: JSON.stringify({ active }) });
+  refresh();
+}
+
+async function del(id) {
+  if (!confirm('Remove this business? Customers will no longer be able to pay them.')) return;
+  await fetch(`${P}/api/admin/merchants/${id}`, { method: 'DELETE', headers: H() });
+  refresh();
+}
+
+const fmt = c => '$' + (c/100).toFixed(2);
+
+async function refreshEmployees() {
+  const res = await fetch(P+'/api/admin/employees', { headers: H() });
+  if (!res.ok) return;
+  const list = await res.json();
+  const tb = document.getElementById('erows');
+  tb.innerHTML = '';
+  list.forEach(e => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${esc(e.name)}</strong></td>
+      <td>${e.cardLast4 ? '&bull;&bull;&bull;&bull; ' + e.cardLast4 : '<span class="badge pend">No card</span>'}</td>
+      <td>${fmt(e.balanceCents)}</td>
+      <td><span class="badge ${e.active ? 'on' : 'off'}">${e.active ? 'Active' : 'Disabled'}</span></td>
+      <td>
+        ${!e.cardLast4 ? `<button class="small" onclick="issueCard('${e.id}')">Issue card</button>` : ''}
+        <button class="small" onclick="fundEmployee('${e.id}')">Add funds</button>
+        <button class="small gray" onclick="toggleEmployee('${e.id}', ${!e.active})">${e.active ? 'Disable' : 'Enable'}</button>
+        <button class="small danger" onclick="delEmployee('${e.id}')">Remove</button>
+      </td>`;
+    tb.appendChild(tr);
+  });
+}
+
+async function addEmployee() {
+  const msg = document.getElementById('empMsg');
+  msg.textContent = 'Adding...';
+  const res = await fetch(P+'/api/admin/employees', {
+    method: 'POST', headers: H(),
+    body: JSON.stringify({
+      name: document.getElementById('en').value,
+      pin: document.getElementById('ep').value,
+      initialAmount: document.getElementById('ef').value
+    })
+  });
+  const data = await res.json();
+  if (!res.ok) { msg.innerHTML = `<span class="err">${esc(data.error)}</span>`; return; }
+  msg.textContent = data.warning ? data.warning : 'Employee added.';
+  document.getElementById('en').value = ''; document.getElementById('ep').value = ''; document.getElementById('ef').value = '';
+  refreshEmployees();
+}
+
+async function fundEmployee(id) {
+  const amt = prompt('Amount to add (USD):');
+  if (!amt) return;
+  const res = await fetch(`${P}/api/admin/employees/${id}/fund`, {
+    method: 'POST', headers: H(), body: JSON.stringify({ amount: amt })
+  });
+  const data = await res.json();
+  if (!res.ok) alert(data.error || 'Error');
+  refreshEmployees();
+}
+
+async function toggleEmployee(id, active) {
+  await fetch(`${P}/api/admin/employees/${id}`, { method: 'PATCH', headers: H(), body: JSON.stringify({ active }) });
+  refreshEmployees();
+}
+
+async function issueCard(id) {
+  const res = await fetch(`${P}/api/admin/employees/${id}/issue-card`, { method: 'POST', headers: H() });
+  const data = await res.json();
+  if (!res.ok) alert(data.error || 'Error');
+  refreshEmployees();
+}
+
+async function delEmployee(id) {
+  if (!confirm('Remove this employee? Their remaining balance is forfeited.')) return;
+  await fetch(`${P}/api/admin/employees/${id}`, { method: 'DELETE', headers: H() });
+  refreshEmployees();
+}
+</script>
+</body>
+</html>
