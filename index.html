@@ -4,61 +4,91 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CrewKitty — Pre-funded spending cards for working crews</title>
-<meta name="description" content="CrewKitty issues pre-funded virtual spending cards that let businesses give employees a set amount to spend only at approved merchants. A software service by JA Oilfield Services LLC.">
+<meta name="description" content="CrewKitty issues pre-funded virtual spending cards that let oilfield and field-service businesses give crew members a set amount to spend only at approved merchants. A software service by JA Oilfield Services LLC.">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#f4f6f8;color:#1a1a2e;line-height:1.55}
-.hero{background:linear-gradient(135deg,#23233a,#0e0e18);color:#fff;padding:52px 16px 64px;text-align:center}
-.logo svg{width:84px;height:84px;border-radius:16px}
-h1{font-size:2rem;letter-spacing:1px;margin:16px 0 8px}h1 .k{color:#635bff}
-.tag{color:#b9bdd4;max-width:620px;margin:0 auto;font-size:1.05rem}
-.cta{display:inline-block;margin:26px 8px 0;padding:13px 22px;border-radius:10px;font-weight:700;text-decoration:none}
-.cta.primary{background:#635bff;color:#fff}.cta.ghost{border:2px solid #635bff;color:#fff}
-.section{max-width:880px;margin:28px auto;padding:0 18px}
-.section h2{font-size:1.25rem;margin-bottom:10px}.section p{color:#444;margin-bottom:10px}
-.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));margin-top:8px}
-.card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.card h3{font-size:1rem;margin-bottom:6px}.card p{color:#555;font-size:.9rem;margin:0}
-.price{background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.price .big{font-size:1.8rem;font-weight:800;color:#635bff}
-footer{text-align:center;color:#777;font-size:.85rem;padding:26px 16px 44px;border-top:1px solid #e3e6ec;margin-top:24px}
-footer a{color:#635bff;text-decoration:none;margin:0 8px}
+body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#13161c;color:#e8eaf0;line-height:1.55}
+a{color:#f5a623}
+.hero{position:relative;background:linear-gradient(135deg,#1b1f27,#0a0c10);color:#fff;padding:0;overflow:hidden}
+.hero-inner{display:flex;flex-wrap:wrap;align-items:center;max-width:1040px;margin:0 auto;padding:40px 20px}
+.hero-copy{flex:1 1 340px;padding:16px 12px}
+.hero-art{flex:1 1 300px;text-align:center;padding:16px}
+.hero-art img{width:100%;max-width:360px;border-radius:16px;border:3px solid #f5a623;box-shadow:0 10px 40px rgba(0,0,0,.55)}
+.brandrow{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.brandrow svg{width:54px;height:54px;border-radius:12px}
+.brandrow .name{font-size:1.5rem;font-weight:800;letter-spacing:1px}
+.brandrow .name .k{color:#635bff}
+h1{font-size:2.1rem;line-height:1.15;margin-bottom:12px}
+h1 .amber{color:#f5a623}
+.tag{color:#b9bdc9;font-size:1.06rem;max-width:520px}
+.cta{display:inline-block;margin:22px 10px 0 0;padding:13px 22px;border-radius:10px;font-weight:700;text-decoration:none}
+.cta.primary{background:#f5a623;color:#1b1f27}
+.cta.ghost{border:2px solid #635bff;color:#fff}
+.strip{background:#f5a623;color:#1b1f27;text-align:center;font-weight:700;padding:10px;letter-spacing:.5px;font-size:.95rem}
+.section{max-width:960px;margin:34px auto;padding:0 20px}
+.section h2{font-size:1.3rem;margin-bottom:12px;color:#fff}
+.section p{color:#c2c6d0;margin-bottom:10px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:10px}
+.card{background:#1b1f27;border:1px solid #2a2f3a;border-left:4px solid #f5a623;border-radius:12px;padding:20px}
+.card h3{font-size:1rem;margin-bottom:6px;color:#fff}.card p{color:#aab0bd;font-size:.9rem;margin:0}
+.price{background:#1b1f27;border:1px solid #2a2f3a;border-radius:12px;padding:26px;text-align:center}
+.price .big{font-size:1.9rem;font-weight:800;color:#f5a623}
+.steps{background:#1b1f27;border:1px solid #2a2f3a;border-radius:12px;padding:24px;color:#c2c6d0}
+footer{text-align:center;color:#8b91a0;font-size:.85rem;padding:28px 16px 46px;border-top:1px solid #2a2f3a;margin-top:26px}
+footer a{margin:0 8px}
 </style>
 </head>
 <body>
 <div class="hero">
-  <div class="logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="84" fill="#14141f"/><polygon points="124,186 154,62 230,158" fill="#e8e9f0"/><polygon points="388,186 358,62 282,158" fill="#e8e9f0"/><polygon points="148,168 162,98 206,152" fill="#14141f"/><polygon points="364,168 350,98 306,152" fill="#14141f"/><polygon points="118,172 394,172 394,262 374,286 386,322 330,322 312,376 256,412 200,376 182,322 126,322 138,286 118,262" fill="#e8e9f0"/><polygon points="156,234 240,222 230,264 164,258" fill="#635bff"/><polygon points="356,234 272,222 282,264 348,258" fill="#635bff"/><polygon points="238,304 274,304 256,334" fill="#14141f"/><polyline points="176,304 104,292" stroke="#e8e9f0" stroke-width="9" stroke-linecap="round" fill="none"/><polyline points="180,326 112,336" stroke="#e8e9f0" stroke-width="9" stroke-linecap="round" fill="none"/><polyline points="336,304 408,292" stroke="#e8e9f0" stroke-width="9" stroke-linecap="round" fill="none"/><polyline points="332,326 400,336" stroke="#e8e9f0" stroke-width="9" stroke-linecap="round" fill="none"/></svg></div>
-  <h1>CREW<span class="k">KITTY</span></h1>
-  <p class="tag">Pre-funded spending cards for working crews. Management sets the amount and the approved businesses; the card enforces the rules.</p>
-  <a class="cta primary" href="/admin">Create a free company account</a>
-  <a class="cta ghost" href="/employee">Employee wallet</a>
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <div class="brandrow">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="84" fill="#14141f"/><polygon points="124,186 154,62 230,158" fill="#e8e9f0"/><polygon points="388,186 358,62 282,158" fill="#e8e9f0"/><polygon points="148,168 162,98 206,152" fill="#14141f"/><polygon points="364,168 350,98 306,152" fill="#14141f"/><polygon points="118,172 394,172 394,262 374,286 386,322 330,322 312,376 256,412 200,376 182,322 126,322 138,286 118,262" fill="#e8e9f0"/><polygon points="156,234 240,222 230,264 164,258" fill="#635bff"/><polygon points="356,234 272,222 282,264 348,258" fill="#635bff"/><polygon points="238,304 274,304 256,334" fill="#14141f"/><polyline points="176,304 104,292" stroke="#e8e9f0" stroke-width="9" stroke-linecap="round" fill="none"/><polyline points="180,326 112,336" stroke="#e8e9f0" stroke-width="9" stroke-linecap="round" fill="none"/><polyline points="336,304 408,292" stroke="#e8e9f0" stroke-width="9" stroke-linecap="round" fill="none"/><polyline points="332,326 400,336" stroke="#e8e9f0" stroke-width="9" stroke-linecap="round" fill="none"/></svg>
+        <span class="name">CREW<span class="k">KITTY</span></span>
+      </div>
+      <h1>Put a hard hat on your <span class="amber">spending.</span></h1>
+      <p class="tag">Pre-funded cards for oilfield and field-service crews. Management sets the amount and the approved businesses — the card does the rest. No plastic, no runaway receipts.</p>
+      <a class="cta primary" href="/admin">Create a free company account</a>
+      <a class="cta ghost" href="/employee">Employee wallet</a>
+    </div>
+    <div class="hero-art">
+      <img src="/hero.jpg" alt="CrewKitty foreman tomcat mascot in a hard hat and overalls at an oilfield site">
+    </div>
+  </div>
 </div>
+<div class="strip">BUILT FOR THE FIELD · FREE TO START · 1% PER TRANSACTION</div>
+
 <div class="section">
   <h2>What CrewKitty is</h2>
-  <p>CrewKitty is a software service that helps small businesses control employee spending. A company loads a set dollar amount onto each employee's account and chooses which businesses that money may be spent at. Each employee gets a virtual company card (usable in Apple Pay or Google Pay) that only works at approved merchants and only up to their available balance. Owners can add funds, freeze a card, or remove an employee at any time.</p>
+  <p>CrewKitty is a software service that helps field-service and oilfield businesses control crew spending. A company loads a set dollar amount onto each employee's account and chooses which businesses that money may be spent at. Each crew member gets a virtual company card (usable in Apple Pay or Google Pay) that only works at approved merchants and only up to their available balance. Owners can add funds, freeze a card, or remove an employee at any time.</p>
   <p>CrewKitty is operated by JA Oilfield Services LLC. It is a spend-management and expense-control tool — we do not sell physical goods.</p>
 </div>
+
 <div class="section">
   <h2>What you get</h2>
   <div class="grid">
-    <div class="card"><h3>Management-set limits</h3><p>Employees can spend only the amount you load — overspending is declined automatically.</p></div>
-    <div class="card"><h3>Approved businesses only</h3><p>Cards work only at the merchants on your list. Add or remove them anytime.</p></div>
-    <div class="card"><h3>Instant control</h3><p>Freeze a card or remove a departing employee in one click; remaining funds return to the company.</p></div>
+    <div class="card"><h3>Management-set limits</h3><p>Crew members spend only the amount you load — overspending is declined automatically.</p></div>
+    <div class="card"><h3>Approved businesses only</h3><p>Cards work only at the merchants on your list — the local car wash, parts house, fuel stop. Add or remove anytime.</p></div>
+    <div class="card"><h3>Instant control</h3><p>Freeze a card or remove a departing hand in one click; remaining funds return to the company.</p></div>
     <div class="card"><h3>No physical cards</h3><p>Virtual cards live in Apple Pay and Google Pay — nothing to print, mail, or activate.</p></div>
   </div>
 </div>
+
 <div class="section">
   <h2>Pricing</h2>
-  <div class="price"><div class="big">Free to sign up · 1% per transaction</div><p style="margin-top:8px;color:#444">Creating a company account and adding employees and businesses is free. CrewKitty charges a 1% software fee on each approved employee card transaction. No monthly fees, no setup fees.</p></div>
+  <div class="price"><div class="big">Free to sign up · 1% per transaction</div><p style="margin-top:8px;color:#c2c6d0">Creating a company account and adding crew members and businesses is free. CrewKitty charges a 1% software fee on each approved card transaction. No monthly fees, no setup fees.</p></div>
 </div>
+
 <div class="section">
   <h2>How it works</h2>
-  <div class="card"><p>1. Create your free company account.<br>2. Add the businesses your crew is allowed to use.<br>3. Add employees with a PIN and a starting amount — a virtual card is issued instantly.<br>4. Employees sign in on their phones, see their balance, and add the card to Apple Pay or Google Pay.<br>5. Top up, freeze, or remove cards anytime from your console.</p></div>
+  <div class="steps"><p>1. Create your free company account.<br>2. Add the businesses your crew is allowed to use.<br>3. Add crew members with a PIN and a starting amount — a virtual card is issued instantly.<br>4. Crew signs in on their phones, sees their balance, and adds the card to Apple Pay or Google Pay.<br>5. Top up, freeze, or remove cards anytime from your console.</p></div>
 </div>
+
 <div class="section">
   <h2>Contact</h2>
-  <div class="card"><p>CrewKitty — a service of JA Oilfield Services LLC<br>Email: <a href="mailto:jwalterscheid@jaoilfieldservices.com" style="color:#635bff">jwalterscheid@jaoilfieldservices.com</a><br>Odessa, Texas, United States</p></div>
+  <div class="card" style="border-left-color:#635bff"><p style="color:#c2c6d0">CrewKitty — a service of JA Oilfield Services LLC<br>Email: <a href="mailto:jwalterscheid@jaoilfieldservices.com">jwalterscheid@jaoilfieldservices.com</a><br>Odessa, Texas, United States</p></div>
 </div>
+
 <footer>&copy; 2026 JA Oilfield Services LLC · CrewKitty<br><br><a href="/terms">Terms of Service</a> · <a href="/privacy">Privacy Policy</a> · <a href="mailto:jwalterscheid@jaoilfieldservices.com">Contact</a></footer>
 </body>
 </html>
