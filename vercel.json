@@ -1,1 +1,11 @@
-{"rewrites":[{"source":"/functions/v1/app/:path*","destination":"https://ldwrbkatgwnhsgrqwnwa.supabase.co/functions/v1/app/:path*"},{"source":"/:path*","destination":"https://ldwrbkatgwnhsgrqwnwa.supabase.co/functions/v1/app/:path*"}],"headers":[{"source":"/","headers":[{"key":"Content-Type","value":"text/html; charset=utf-8"},{"key":"Content-Security-Policy","value":"default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self' data:"}]},{"source":"/(admin|employee|platform|success)","headers":[{"key":"Content-Type","value":"text/html; charset=utf-8"},{"key":"Content-Security-Policy","value":"default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self' data:"}]}]}
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/admin", "destination": "https://ldwrbkatgwnhsgrqwnwa.supabase.co/functions/v1/app/admin" },
+    { "source": "/employee", "destination": "https://ldwrbkatgwnhsgrqwnwa.supabase.co/functions/v1/app/employee" },
+    { "source": "/platform", "destination": "https://ldwrbkatgwnhsgrqwnwa.supabase.co/functions/v1/app/platform" },
+    { "source": "/success", "destination": "https://ldwrbkatgwnhsgrqwnwa.supabase.co/functions/v1/app/success" },
+    { "source": "/api/(.*)", "destination": "https://ldwrbkatgwnhsgrqwnwa.supabase.co/functions/v1/app/api/$1" },
+    { "source": "/functions/v1/app/(.*)", "destination": "https://ldwrbkatgwnhsgrqwnwa.supabase.co/functions/v1/app/$1" }
+  ]
+}
