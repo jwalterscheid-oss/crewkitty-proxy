@@ -21,6 +21,7 @@
   .tx { border-bottom: 1px solid #eee; padding: 8px 0; font-size: .85rem; display: flex; justify-content: space-between; }
   .tx small { color: #888; }
 </style>
+<script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 <div class="wrap">
@@ -40,6 +41,20 @@
       <div class="bal-label">Available balance</div>
       <div class="balance" id="bal">$0.00</div>
       <div class="bal-label" id="cardline"></div>
+    </div>
+    <div class="card" id="applePayCard" style="display:none">
+      <label>Add card to Apple Pay / Google Pay</label>
+      <div class="bal-label" style="margin-bottom:10px">Tap "Show card details", then on your phone open the <b>Wallet</b> app &rarr; <b>+</b> &rarr; <b>Add Card</b> &rarr; <b>Enter Card Details Manually</b>, and type the number, expiry, and CVC shown below.</div>
+      <button id="showCardBtn" onclick="showCard()">Show card details</button>
+      <div id="cardDetails" style="display:none;margin-top:14px">
+        <div class="bal-label">Card number</div>
+        <div id="ck-number" style="padding:11px;border:1px solid #d0d5dd;border-radius:8px;min-height:44px"></div>
+        <div style="display:flex;gap:10px;margin-top:8px">
+          <div style="flex:1"><div class="bal-label">Expiry</div><div id="ck-exp" style="padding:11px;border:1px solid #d0d5dd;border-radius:8px;min-height:44px"></div></div>
+          <div style="flex:1"><div class="bal-label">CVC</div><div id="ck-cvc" style="padding:11px;border:1px solid #d0d5dd;border-radius:8px;min-height:44px"></div></div>
+        </div>
+      </div>
+      <div class="err" id="cardErr"></div>
     </div>
     <div class="card">
       <label>Pay business</label>
@@ -64,7 +79,9 @@
 </div>
 <script>
 const P='/functions/v1/app';
-let EID = '', PIN = '', CID = '';
+let EID = '', PIN = '', CID = '', CARDID = '';
+const PK = 'pk_live_51TCKLXH7YzZnp6cgJFdwSh4eq5NmApTIIxFI4yzr4vN5RVgTRFO6Jewq6saPuH2tk7fg3z8QonEYTiOZoSIblxXj00pSFHxWRA';
+let stripeJs = null;
 const H = () => ({ 'Content-Type': 'application/json', 'x-employee-id': EID, 'x-employee-pin': PIN });
 const fmt = c => '$' + (c/100).toFixed(2);
 
@@ -101,6 +118,8 @@ async function loadMerchants() {
 function refresh(data) {
   document.getElementById('bal').textContent = fmt(data.balanceCents);
   document.getElementById('cardline').textContent = data.cardLast4 ? 'Company card \u2022\u2022\u2022\u2022 ' + data.cardLast4 : 'No card issued yet \u2014 ask your admin';
+  CARDID = data.cardId || '';
+  document.getElementById('applePayCard').style.display = CARDID ? 'block' : 'none';
   const txs = document.getElementById('txs');
   txs.innerHTML = '';
   (data.transactions || []).forEach(t => {
@@ -135,6 +154,27 @@ async function pay() {
   ok.textContent = 'Paid! New balance: ' + fmt(data.balanceCents);
   document.getElementById('amount').value = ''; document.getElementById('desc').value = '';
   me();
+}
+
+async function showCard() {
+  const errEl = document.getElementById('cardErr'); errEl.textContent = '';
+  const btn = document.getElementById('showCardBtn'); btn.disabled = true; btn.textContent = 'Loading\u2026';
+  try {
+    if (!CARDID) throw new Error('No card issued yet');
+    if (!stripeJs) stripeJs = Stripe(PK);
+    const nres = await stripeJs.createEphemeralKeyNonce({ issuingCard: CARDID });
+    const res = await fetch(P+'/api/employee/card-ephemeral', { method: 'POST', headers: H(), body: JSON.stringify({ nonce: nres.nonce }) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not load card');
+    const elements = stripeJs.elements();
+    const style = { base: { fontSize: '18px', color: '#1a1a2e', fontFamily: '-apple-system, Segoe UI, Roboto, sans-serif' } };
+    const common = { issuingCard: CARDID, nonce: nres.nonce, ephemeralKeySecret: data.ephemeralKeySecret, style };
+    elements.create('issuingCardNumberDisplay', common).mount('#ck-number');
+    elements.create('issuingCardExpiryDisplay', common).mount('#ck-exp');
+    elements.create('issuingCardCvcDisplay', common).mount('#ck-cvc');
+    document.getElementById('cardDetails').style.display = 'block';
+    btn.style.display = 'none';
+  } catch (e) { errEl.textContent = e.message; btn.disabled = false; btn.textContent = 'Show card details'; }
 }
 </script>
 </body>
