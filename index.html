@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CrewKitty — The crew card that only works where you say</title>
 <meta name="description" content="CrewKitty is the spend card for small oilfield and trades crews. Load each hand a balance, approve the businesses it works at, and never chase a receipt again. No credit check. No minimums. Set up before lunch. A software service by JA Oilfield Services LLC.">
+<link rel="icon" type="image/png" sizes="192x192" href="/logo.png">
+<link rel="apple-touch-icon" href="/logo.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://crewkitty.com/">
+<meta property="og:title" content="CrewKitty — The crew card that only works where you say">
+<meta property="og:description" content="Load each hand a balance, approve the businesses it works at, and never chase a receipt again. No credit check. No minimums. Set up before lunch.">
+<meta property="og:image" content="https://crewkitty.com/logo.png">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"CrewKitty","url":"https://crewkitty.com","logo":"https://crewkitty.com/logo.png","email":"jwalterscheid@jaoilfieldservices.com","parentOrganization":{"@type":"Organization","name":"JA Oilfield Services LLC"}}</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#13161c;color:#e8eaf0;line-height:1.55}
@@ -47,7 +56,7 @@ footer a{margin:0 8px}
       </div>
       <h1>The crew card that only works <span class="amber">where you say.</span></h1>
       <p class="tag">Load each hand a balance, approve the businesses it works at, and never chase a receipt again. No credit check. No minimums. Set up before lunch.</p>
-      <a class="cta primary" href="/admin">Create a free company account</a>
+      <a class="cta primary" href="/admin">Set up in 15 minutes — free</a>
       <a class="cta ghost" href="/employee">Employee wallet</a>
     </div>
     <div class="hero-art">
@@ -89,5 +98,43 @@ footer a{margin:0 8px}
 </div>
 
 <footer>&copy; 2026 JA Oilfield Services LLC · CrewKitty<br><br><a href="/terms">Terms of Service</a> · <a href="/privacy">Privacy Policy</a> · <a href="mailto:jwalterscheid@jaoilfieldservices.com">Contact</a></footer>
+<!-- CrewKitty support chat -->
+<style>
+#ck-chat-btn{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:#635bff;color:#fff;font-size:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.35);z-index:9998}
+#ck-chat{display:none;position:fixed;bottom:88px;right:20px;width:min(360px,calc(100vw - 24px));height:min(520px,calc(100vh - 120px));background:#1b1f27;border:1px solid #2a2f3a;border-radius:14px;flex-direction:column;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:9999;font-family:-apple-system,Segoe UI,Roboto,sans-serif}
+#ck-chat .ck-head{background:#635bff;color:#fff;font-weight:700;padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
+#ck-chat .ck-head span{cursor:pointer;font-size:20px;line-height:1}
+#ck-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.ck-m{max-width:85%;padding:9px 12px;border-radius:12px;font-size:.9rem;line-height:1.4;white-space:pre-wrap;word-wrap:break-word}
+.ck-m.u{align-self:flex-end;background:#635bff;color:#fff;border-bottom-right-radius:4px}
+.ck-m.a{align-self:flex-start;background:#2a2f3a;color:#e8eaf0;border-bottom-left-radius:4px}
+.ck-row{display:flex;gap:8px;padding:10px;border-top:1px solid #2a2f3a;background:#13161c}
+.ck-row input{flex:1;padding:10px;border:1px solid #2a2f3a;border-radius:8px;background:#1b1f27;color:#e8eaf0;font-size:.9rem;margin:0;width:auto}
+.ck-row button{width:auto;margin:0;padding:10px 14px;background:#f5a623;color:#1b1f27;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:.9rem}
+</style>
+<div id="ck-chat-btn" onclick="ckToggle()" title="Questions? Chat with us">&#128172;</div>
+<div id="ck-chat">
+  <div class="ck-head">CrewKitty Help<span onclick="ckToggle()">&times;</span></div>
+  <div id="ck-msgs"></div>
+  <div class="ck-row"><input id="ck-in" placeholder="Ask about cards, declines, setup..." onkeydown="if(event.key==='Enter')ckSend()"><button onclick="ckSend()">Send</button></div>
+</div>
+<script>
+const CK_HIST = [];
+let CK_OPEN = false;
+function ckAdd(cls, text){ const d = document.createElement('div'); d.className = 'ck-m ' + cls; d.textContent = text; document.getElementById('ck-msgs').appendChild(d); d.scrollIntoView({block:'end'}); return d; }
+function ckToggle(){ CK_OPEN = !CK_OPEN; document.getElementById('ck-chat').style.display = CK_OPEN ? 'flex' : 'none'; if (CK_OPEN && !CK_HIST.length) ckAdd('a', "Howdy — I'm the CrewKitty helper. Ask me anything: setting up your crew, why a card declined, adding a card to Apple Pay, pricing, whatever you're stuck on."); }
+function ckAuth(){ return { 'Content-Type': 'application/json' }; }
+async function ckSend(){
+  const inp = document.getElementById('ck-in'); const v = inp.value.trim(); if (!v) return;
+  inp.value = ''; ckAdd('u', v); CK_HIST.push({role:'user', content:v});
+  const t = ckAdd('a', '…');
+  try {
+    const res = await fetch('/api/support/chat', { method:'POST', headers: ckAuth(), body: JSON.stringify({ messages: CK_HIST.slice(-12) }) });
+    const d = await res.json();
+    t.textContent = d.reply || d.error || 'Something went wrong — email jwalterscheid@jaoilfieldservices.com';
+    CK_HIST.push({role:'assistant', content:t.textContent});
+  } catch (e) { t.textContent = 'Connection trouble — try again in a moment.'; }
+}
+</script>
 </body>
 </html>

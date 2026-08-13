@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" sizes="192x192" href="/logo.png">
+<link rel="apple-touch-icon" href="/logo.png">
 <title>CrewKitty — Company Console</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -86,6 +88,14 @@
       <div class="msg">Employees sign in at <a href="/employee" target="_blank">the wallet page</a> with their name + PIN.</div>
     </div>
 
+    <div class="card" id="billingCard">
+      <h2 style="font-size:1.1rem">Billing</h2>
+      <div class="msg" id="billingInfo">Loading…</div>
+      <button id="billingBtn" style="display:none" onclick="startBilling()">Set up billing</button>
+      <button id="portalBtn" class="gray" style="display:none" onclick="openPortal()">Manage billing</button>
+      <div class="msg err" id="billingErr"></div>
+    </div>
+
     <div class="card">
       <h2 style="font-size:1.1rem">Businesses</h2>
       <table>
@@ -112,6 +122,38 @@ async function unlock() {
   document.getElementById('panel').style.display = 'block';
   refresh();
   refreshEmployees();
+  if (new URLSearchParams(location.search).get('billing') === 'success') {
+    await fetch(P+'/api/admin/billing/sync', { method: 'POST', headers: H() }).catch(()=>{});
+    history.replaceState(null, '', '/admin');
+  }
+  loadBilling();
+}
+
+async function loadBilling() {
+  const info = document.getElementById('billingInfo'), err = document.getElementById('billingErr');
+  try {
+    const res = await fetch(P+'/api/admin/billing', { headers: H() });
+    const b = await res.json();
+    if (!res.ok) { err.textContent = b.error || 'Could not load billing'; return; }
+    const cost = (b.monthlyCents/100).toFixed(2);
+    info.textContent = `${b.activeCards} active card${b.activeCards===1?'':'s'} — first 2 free, ${b.billableCards} billable at $10/mo each = $${cost}/month.` + (b.subscribed ? ` Subscription ${b.status}.` : (b.billableCards ? ' No subscription yet.' : ' Nothing to pay while you have 2 or fewer cards.'));
+    document.getElementById('billingBtn').style.display = (!b.subscribed && b.billableCards > 0) ? 'inline-block' : 'none';
+    document.getElementById('portalBtn').style.display = b.subscribed ? 'inline-block' : 'none';
+  } catch { info.textContent = 'Could not load billing.'; }
+}
+async function startBilling() {
+  const err = document.getElementById('billingErr'); err.textContent = '';
+  const res = await fetch(P+'/api/admin/billing/checkout', { method: 'POST', headers: H() });
+  const d = await res.json();
+  if (!res.ok) { err.textContent = d.error || 'Could not start checkout'; return; }
+  location.href = d.url;
+}
+async function openPortal() {
+  const err = document.getElementById('billingErr'); err.textContent = '';
+  const res = await fetch(P+'/api/admin/billing/portal', { method: 'POST', headers: H() });
+  const d = await res.json();
+  if (!res.ok) { err.textContent = d.error || 'Could not open portal'; return; }
+  location.href = d.url;
 }
 
 async function signup() {
@@ -240,6 +282,7 @@ async function addEmployee() {
   msg.textContent = data.note || data.warning || 'Employee added.';
   document.getElementById('en').value = ''; document.getElementById('ep').value = ''; document.getElementById('ef').value = '';
   refreshEmployees();
+  loadBilling();
 }
 
 async function fundEmployee(id) {
@@ -256,6 +299,7 @@ async function fundEmployee(id) {
 async function toggleEmployee(id, active) {
   await fetch(`${P}/api/admin/employees/${id}`, { method: 'PATCH', headers: H(), body: JSON.stringify({ active }) });
   refreshEmployees();
+  loadBilling();
 }
 
 async function issueCard(id) {
@@ -263,12 +307,52 @@ async function issueCard(id) {
   const data = await res.json();
   if (!res.ok) alert(data.error || 'Error');
   refreshEmployees();
+  loadBilling();
 }
 
 async function delEmployee(id) {
   if (!confirm('Remove this employee? Their remaining balance is forfeited.')) return;
   await fetch(`${P}/api/admin/employees/${id}`, { method: 'DELETE', headers: H() });
   refreshEmployees();
+  loadBilling();
+}
+</script>
+<!-- CrewKitty support chat -->
+<style>
+#ck-chat-btn{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:#635bff;color:#fff;font-size:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.35);z-index:9998}
+#ck-chat{display:none;position:fixed;bottom:88px;right:20px;width:min(360px,calc(100vw - 24px));height:min(520px,calc(100vh - 120px));background:#1b1f27;border:1px solid #2a2f3a;border-radius:14px;flex-direction:column;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:9999;font-family:-apple-system,Segoe UI,Roboto,sans-serif}
+#ck-chat .ck-head{background:#635bff;color:#fff;font-weight:700;padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
+#ck-chat .ck-head span{cursor:pointer;font-size:20px;line-height:1}
+#ck-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.ck-m{max-width:85%;padding:9px 12px;border-radius:12px;font-size:.9rem;line-height:1.4;white-space:pre-wrap;word-wrap:break-word}
+.ck-m.u{align-self:flex-end;background:#635bff;color:#fff;border-bottom-right-radius:4px}
+.ck-m.a{align-self:flex-start;background:#2a2f3a;color:#e8eaf0;border-bottom-left-radius:4px}
+.ck-row{display:flex;gap:8px;padding:10px;border-top:1px solid #2a2f3a;background:#13161c}
+.ck-row input{flex:1;padding:10px;border:1px solid #2a2f3a;border-radius:8px;background:#1b1f27;color:#e8eaf0;font-size:.9rem;margin:0;width:auto}
+.ck-row button{width:auto;margin:0;padding:10px 14px;background:#f5a623;color:#1b1f27;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:.9rem}
+</style>
+<div id="ck-chat-btn" onclick="ckToggle()" title="Questions? Chat with us">&#128172;</div>
+<div id="ck-chat">
+  <div class="ck-head">CrewKitty Help<span onclick="ckToggle()">&times;</span></div>
+  <div id="ck-msgs"></div>
+  <div class="ck-row"><input id="ck-in" placeholder="Ask about cards, declines, setup..." onkeydown="if(event.key==='Enter')ckSend()"><button onclick="ckSend()">Send</button></div>
+</div>
+<script>
+const CK_HIST = [];
+let CK_OPEN = false;
+function ckAdd(cls, text){ const d = document.createElement('div'); d.className = 'ck-m ' + cls; d.textContent = text; document.getElementById('ck-msgs').appendChild(d); d.scrollIntoView({block:'end'}); return d; }
+function ckToggle(){ CK_OPEN = !CK_OPEN; document.getElementById('ck-chat').style.display = CK_OPEN ? 'flex' : 'none'; if (CK_OPEN && !CK_HIST.length) ckAdd('a', "Howdy — I'm the CrewKitty helper. Ask me anything: setting up your crew, why a card declined, adding a card to Apple Pay, pricing, whatever you're stuck on."); }
+function ckAuth(){ const h = { 'Content-Type': 'application/json' }; if (typeof EM !== 'undefined' && EM) { h['x-company-email'] = EM; h['x-company-password'] = PW; } return h; }
+async function ckSend(){
+  const inp = document.getElementById('ck-in'); const v = inp.value.trim(); if (!v) return;
+  inp.value = ''; ckAdd('u', v); CK_HIST.push({role:'user', content:v});
+  const t = ckAdd('a', '…');
+  try {
+    const res = await fetch('/api/support/chat', { method:'POST', headers: ckAuth(), body: JSON.stringify({ messages: CK_HIST.slice(-12) }) });
+    const d = await res.json();
+    t.textContent = d.reply || d.error || 'Something went wrong — email jwalterscheid@jaoilfieldservices.com';
+    CK_HIST.push({role:'assistant', content:t.textContent});
+  } catch (e) { t.textContent = 'Connection trouble — try again in a moment.'; }
 }
 </script>
 </body>
