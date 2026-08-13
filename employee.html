@@ -42,6 +42,20 @@
       <div class="balance" id="bal">$0.00</div>
       <div class="bal-label" id="cardline"></div>
     </div>
+    <div class="card" id="activateCard" style="display:none">
+      <label style="margin-top:0">Activate your company card</label>
+      <div class="bal-label" style="margin-bottom:4px">One quick step — the card issuer needs your contact info and your agreement to the card terms. Takes under a minute.</div>
+      <label>Your email</label>
+      <input id="act-email" type="email" autocomplete="email" placeholder="you@example.com">
+      <label>Your mobile number</label>
+      <input id="act-phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="(555) 123-4567">
+      <label style="font-weight:400;display:flex;gap:10px;align-items:flex-start;margin-top:16px">
+        <input type="checkbox" id="act-agree" style="width:auto;margin-top:3px">
+        <span style="font-size:.85rem">I agree to the <a href="https://stripe.com/legal/issuing/crb-authorized-user-terms" target="_blank">Cross River Bank Authorized User Terms</a> and <a href="https://stripe.com/legal/e-sign-disclosure" target="_blank">E-sign policy</a>.</span>
+      </label>
+      <button id="activateBtn" onclick="activate()">Activate my card</button>
+      <div class="err" id="actErr"></div>
+    </div>
     <div class="card" id="applePayCard" style="display:none">
       <label>Add card to Apple Pay / Google Pay</label>
       <div class="bal-label" style="margin-bottom:10px">Tap "Show card details", then on your phone open the <b>Wallet</b> app &rarr; <b>+</b> &rarr; <b>Add Card</b> &rarr; <b>Enter Card Details Manually</b>, and type the number, expiry, and CVC shown below.</div>
@@ -117,9 +131,12 @@ async function loadMerchants() {
 
 function refresh(data) {
   document.getElementById('bal').textContent = fmt(data.balanceCents);
-  document.getElementById('cardline').textContent = data.cardLast4 ? 'Company card \u2022\u2022\u2022\u2022 ' + data.cardLast4 : 'No card issued yet \u2014 ask your admin';
+  document.getElementById('cardline').textContent = data.cardLast4 ? 'Company card \u2022\u2022\u2022\u2022 ' + data.cardLast4 : (data.needsActivation ? 'Activate below to get your card' : 'No card issued yet \u2014 ask your admin');
   CARDID = data.cardId || '';
   document.getElementById('applePayCard').style.display = CARDID ? 'block' : 'none';
+  document.getElementById('activateCard').style.display = data.needsActivation ? 'block' : 'none';
+  if (data.email) document.getElementById('act-email').value = data.email;
+  if (data.phone) document.getElementById('act-phone').value = data.phone;
   const txs = document.getElementById('txs');
   txs.innerHTML = '';
   (data.transactions || []).forEach(t => {
@@ -129,6 +146,26 @@ function refresh(data) {
     d.innerHTML = `<span>${t.merchantName || t.type}${t.description ? ' — ' + t.description : ''}<br><small>${new Date(t.createdAt).toLocaleString()}</small></span><strong>${sign}${fmt(t.amountCents)}</strong>`;
     txs.appendChild(d);
   });
+}
+
+async function activate() {
+  const err = document.getElementById('actErr'); err.textContent = '';
+  const btn = document.getElementById('activateBtn');
+  btn.disabled = true; btn.textContent = 'Activating…';
+  try {
+    const res = await fetch(P+'/api/employee/activate', {
+      method: 'POST', headers: H(),
+      body: JSON.stringify({
+        email: document.getElementById('act-email').value,
+        phone: document.getElementById('act-phone').value,
+        agree: document.getElementById('act-agree').checked
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Activation failed');
+    refresh(data);
+  } catch (e) { err.textContent = e.message; }
+  btn.disabled = false; btn.textContent = 'Activate my card';
 }
 
 async function me() {

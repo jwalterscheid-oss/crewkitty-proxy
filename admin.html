@@ -77,7 +77,7 @@
       <input id="ep" inputmode="numeric" placeholder="1234">
       <label>Initial funds (USD, optional)</label>
       <input id="ef" type="number" min="0" step="0.01" placeholder="500.00">
-      <button onclick="addEmployee()">Add employee &amp; issue card</button>
+      <button onclick="addEmployee()">Add employee</button>
       <div class="msg" id="empMsg"></div>
       <table>
         <thead><tr><th>Employee</th><th>Card</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
@@ -127,7 +127,11 @@ async function signup() {
   });
   const data = await res.json();
   if (!res.ok) { msg.innerHTML = `<span class="err">${esc(data.error)}</span>`; return; }
-  msg.textContent = 'Account created! Sign in above with your email and password.';
+  // Sign the new company straight in — no need to retype credentials.
+  document.getElementById('lemail').value = document.getElementById('semail').value;
+  document.getElementById('lpw').value = document.getElementById('spw').value;
+  msg.textContent = 'Account created! Signing you in…';
+  unlock();
 }
 
 async function refresh() {
@@ -207,11 +211,11 @@ async function refreshEmployees() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><strong>${esc(e.name)}</strong></td>
-      <td>${e.cardLast4 ? '&bull;&bull;&bull;&bull; ' + e.cardLast4 : '<span class="badge pend">No card</span>'}</td>
+      <td>${e.cardLast4 ? '&bull;&bull;&bull;&bull; ' + e.cardLast4 : '<span class="badge pend" title="Card is issued automatically when the employee signs in at the wallet page and confirms their info">Awaiting activation</span>'}</td>
       <td>${fmt(e.balanceCents)}</td>
       <td><span class="badge ${e.active ? 'on' : 'off'}">${e.active ? 'Active' : 'Disabled'}</span></td>
       <td>
-        ${!e.cardLast4 ? `<button class="small" onclick="issueCard('${e.id}')">Issue card</button>` : ''}
+        ${!e.cardLast4 && e.activated ? `<button class="small" onclick="issueCard('${e.id}')">Issue card</button>` : ''}
         <button class="small" onclick="fundEmployee('${e.id}')">Add funds</button>
         <button class="small gray" onclick="toggleEmployee('${e.id}', ${!e.active})">${e.active ? 'Disable' : 'Enable'}</button>
         <button class="small danger" onclick="delEmployee('${e.id}')">Remove</button>
@@ -233,7 +237,7 @@ async function addEmployee() {
   });
   const data = await res.json();
   if (!res.ok) { msg.innerHTML = `<span class="err">${esc(data.error)}</span>`; return; }
-  msg.textContent = data.warning ? data.warning : 'Employee added.';
+  msg.textContent = data.note || data.warning || 'Employee added.';
   document.getElementById('en').value = ''; document.getElementById('ep').value = ''; document.getElementById('ef').value = '';
   refreshEmployees();
 }
