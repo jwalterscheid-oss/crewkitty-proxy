@@ -52,10 +52,21 @@
     <label>Password</label>
     <input id="spw" type="password" placeholder="8+ characters">
     <button onclick="signup()">Create account</button>
+    <div class="msg">After signup you'll fund your account straight from your business bank (or card) via Stripe, then load balances onto your crew's cards.</div>
     <div class="msg" id="signupMsg"></div>
   </div>
 
   <div id="panel" style="display:none">
+    <div class="card" id="walletCard">
+      <h2 style="font-size:1.1rem">Company wallet</h2>
+      <div class="msg" id="walletInfo">Loading…</div>
+      <label>Add funds (USD)</label>
+      <input id="fundAmt" type="number" min="10" step="0.01" placeholder="1000.00">
+      <button onclick="fundWallet()">Add funds from bank or card</button>
+      <div class="msg">Pay straight from your business bank account (ACH) or a card — powered by Stripe. Bank transfers can take a few business days to clear; they show up here automatically once paid. This wallet is what you load onto your crew's cards.</div>
+      <div class="msg err" id="walletErr"></div>
+    </div>
+
     <div class="card">
       <h2 style="font-size:1.1rem">Add a business</h2>
       <label>Business name</label>
@@ -122,11 +133,33 @@ async function unlock() {
   document.getElementById('panel').style.display = 'block';
   refresh();
   refreshEmployees();
-  if (new URLSearchParams(location.search).get('billing') === 'success') {
+  const q = new URLSearchParams(location.search);
+  if (q.get('billing') === 'success') {
     await fetch(P+'/api/admin/billing/sync', { method: 'POST', headers: H() }).catch(()=>{});
     history.replaceState(null, '', '/admin');
   }
+  if (q.get('funding') === 'success') history.replaceState(null, '', '/admin');
+  // Always sync pending funding on sign-in so cleared ACH payments post.
+  await fetch(P+'/api/admin/funding/sync', { method: 'POST', headers: H() }).catch(()=>{});
+  loadWallet();
   loadBilling();
+}
+
+async function loadWallet() {
+  try {
+    const res = await fetch(P+'/api/admin/wallet', { headers: H() });
+    const w = await res.json();
+    if (!res.ok) return;
+    const pendSum = (w.pending || []).reduce((a,p)=>a+p.amount_cents, 0);
+    document.getElementById('walletInfo').textContent = 'Balance: ' + fmt(w.balanceCents) + (pendSum ? ' · ' + fmt(pendSum) + ' pending (bank payment clearing)' : '');
+  } catch {}
+}
+async function fundWallet() {
+  const err = document.getElementById('walletErr'); err.textContent = '';
+  const res = await fetch(P+'/api/admin/funding/checkout', { method: 'POST', headers: H(), body: JSON.stringify({ amount: document.getElementById('fundAmt').value }) });
+  const d = await res.json();
+  if (!res.ok) { err.textContent = d.error || 'Could not start payment'; return; }
+  location.href = d.url;
 }
 
 async function loadBilling() {
@@ -283,6 +316,7 @@ async function addEmployee() {
   document.getElementById('en').value = ''; document.getElementById('ep').value = ''; document.getElementById('ef').value = '';
   refreshEmployees();
   loadBilling();
+  loadWallet();
 }
 
 async function fundEmployee(id) {
@@ -294,6 +328,7 @@ async function fundEmployee(id) {
   const data = await res.json();
   if (!res.ok) alert(data.error || 'Error');
   refreshEmployees();
+  loadWallet();
 }
 
 async function toggleEmployee(id, active) {
@@ -311,10 +346,11 @@ async function issueCard(id) {
 }
 
 async function delEmployee(id) {
-  if (!confirm('Remove this employee? Their remaining balance is forfeited.')) return;
+  if (!confirm('Remove this employee? Their card is canceled and any remaining balance returns to your company wallet.')) return;
   await fetch(`${P}/api/admin/employees/${id}`, { method: 'DELETE', headers: H() });
   refreshEmployees();
   loadBilling();
+  loadWallet();
 }
 </script>
 <!-- CrewKitty support chat -->
