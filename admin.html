@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="/logo.png">
 <link rel="apple-touch-icon" href="/logo.png">
-<title>CrewKitty — Company Console</title>
+<title>SaySo — Company Console</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; background: linear-gradient(rgba(19,22,28,.78), rgba(19,22,28,.92)), url('/hero.jpg') center 20%/cover no-repeat fixed #13161c; color: #1a1a2e; min-height: 100vh; }
+  body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; background: linear-gradient(160deg, #1b1f27 0%, #13161c 55%, #221c10 100%); color: #1a1a2e; min-height: 100vh; }
   .wrap { max-width: 760px; margin: 40px auto; padding: 0 16px; }
   h1 { font-size: 1.5rem; margin-bottom: 16px; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,.6); }
   .card { border-top: 3px solid #f5a623; }
@@ -32,7 +33,7 @@
 </head>
 <body>
 <div class="wrap">
-  <h1 id="title">CrewKitty</h1>
+  <h1 id="title">SaySo</h1>
 
   <div class="card" id="login">
     <h2 style="font-size:1.1rem">Sign in to your company</h2>
@@ -45,7 +46,7 @@
   </div>
 
   <div class="card" id="signup">
-    <h2 style="font-size:1.1rem">New to CrewKitty? Create a free company account</h2>
+    <h2 style="font-size:1.1rem">New to SaySo? Create a free company account</h2>
     <label>Company name</label>
     <input id="sname" placeholder="Your Company LLC">
     <label>Email</label>
@@ -488,7 +489,7 @@ async function delEmployee(id) {
   loadDashboard();
 }
 </script>
-<!-- CrewKitty support chat -->
+<!-- SaySo support chat -->
 <style>
 #ck-chat-btn{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:#635bff;color:#fff;font-size:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.35);z-index:9998}
 #ck-chat{display:none;position:fixed;bottom:88px;right:20px;width:min(360px,calc(100vw - 24px));height:min(520px,calc(100vh - 120px));background:#1b1f27;border:1px solid #2a2f3a;border-radius:14px;flex-direction:column;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:9999;font-family:-apple-system,Segoe UI,Roboto,sans-serif}
@@ -504,7 +505,7 @@ async function delEmployee(id) {
 </style>
 <div id="ck-chat-btn" onclick="ckToggle()" title="Questions? Chat with us">&#128172;</div>
 <div id="ck-chat">
-  <div class="ck-head">CrewKitty Help<span onclick="ckToggle()">&times;</span></div>
+  <div class="ck-head">SaySo Help<span onclick="ckToggle()">&times;</span></div>
   <div id="ck-msgs"></div>
   <div class="ck-row"><input id="ck-in" placeholder="Ask about cards, declines, setup..." onkeydown="if(event.key==='Enter')ckSend()"><button onclick="ckSend()">Send</button></div>
 </div>
@@ -512,7 +513,7 @@ async function delEmployee(id) {
 const CK_HIST = [];
 let CK_OPEN = false;
 function ckAdd(cls, text){ const d = document.createElement('div'); d.className = 'ck-m ' + cls; d.textContent = text; document.getElementById('ck-msgs').appendChild(d); d.scrollIntoView({block:'end'}); return d; }
-function ckToggle(){ CK_OPEN = !CK_OPEN; document.getElementById('ck-chat').style.display = CK_OPEN ? 'flex' : 'none'; if (CK_OPEN && !CK_HIST.length) ckAdd('a', "Howdy — I'm the CrewKitty helper. Ask me anything: setting up your crew, why a card declined, adding a card to Apple Pay, pricing, whatever you're stuck on."); }
+function ckToggle(){ CK_OPEN = !CK_OPEN; document.getElementById('ck-chat').style.display = CK_OPEN ? 'flex' : 'none'; if (CK_OPEN && !CK_HIST.length) ckAdd('a', "Howdy — I'm the SaySo helper. Ask me anything: setting up your crew, why a card declined, adding a card to Apple Pay, pricing, whatever you're stuck on."); }
 function ckAuth(){ const h = { 'Content-Type': 'application/json' }; if (typeof EM !== 'undefined' && EM) { h['x-company-email'] = EM; h['x-company-password'] = PW; } return h; }
 async function ckSend(){
   const inp = document.getElementById('ck-in'); const v = inp.value.trim(); if (!v) return;

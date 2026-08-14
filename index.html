@@ -3,36 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CrewKitty — The crew card that only works where you say</title>
-<meta name="description" content="CrewKitty is the spend card for small oilfield and trades crews. Load each hand a balance, approve the businesses it works at, and never chase a receipt again. No credit check. No minimums. Set up before lunch. A software service by JA Oilfield Services LLC.">
+<title>SaySo — The crew card that only works where you say so</title>
+<meta name="description" content="SaySo is the spend card for small crews — HVAC, plumbing, landscaping, construction, and every trade in between. Load each crew member a balance, approve the businesses their card works at, and OK anything else by text. No credit check. No minimums. Set up before lunch. A service of JA Oilfield Services LLC.">
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="/logo.png">
 <link rel="apple-touch-icon" href="/logo.png">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://crewkitty.com/">
-<meta property="og:title" content="CrewKitty — The crew card that only works where you say">
-<meta property="og:description" content="Load each hand a balance, approve the businesses it works at, and never chase a receipt again. No credit check. No minimums. Set up before lunch.">
+<meta property="og:title" content="SaySo — The crew card that only works where you say so">
+<meta property="og:description" content="Load each crew member a balance, approve the businesses their card works at, and OK anything else with a one-tap text. No credit check. No minimums.">
 <meta property="og:image" content="https://crewkitty.com/logo.png">
 <meta name="twitter:card" content="summary">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"CrewKitty","url":"https://crewkitty.com","logo":"https://crewkitty.com/logo.png","email":"jwalterscheid@jaoilfieldservices.com","parentOrganization":{"@type":"Organization","name":"JA Oilfield Services LLC"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"SaySo","url":"https://crewkitty.com","logo":"https://crewkitty.com/logo.png","email":"jwalterscheid@jaoilfieldservices.com","parentOrganization":{"@type":"Organization","name":"JA Oilfield Services LLC"}}</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#13161c;color:#e8eaf0;line-height:1.55}
 a{color:#f5a623}
 .hero{position:relative;background:linear-gradient(135deg,#1b1f27,#0a0c10);color:#fff;padding:0;overflow:hidden}
-.hero-inner{display:flex;flex-wrap:wrap;align-items:center;max-width:1040px;margin:0 auto;padding:40px 20px}
+.hero-inner{display:flex;flex-wrap:wrap;align-items:center;max-width:1040px;margin:0 auto;padding:48px 20px}
 .hero-copy{flex:1 1 340px;padding:16px 12px}
-.hero-art{flex:1 1 300px;text-align:center;padding:16px}
-.hero-art img{width:100%;max-width:360px;border-radius:16px;border:3px solid #f5a623;box-shadow:0 10px 40px rgba(0,0,0,.55)}
-.brandrow{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.brandrow svg{width:54px;height:54px;border-radius:12px}
-.brandrow .name{font-size:1.5rem;font-weight:800;letter-spacing:1px}
-.brandrow .name .k{color:#635bff}
+.hero-art{flex:1 1 300px;display:flex;align-items:center;justify-content:center;padding:16px}
+.brandrow{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.brandrow img{width:46px;height:46px;border-radius:10px}
+.brandrow .name{font-size:1.6rem;font-weight:800;letter-spacing:1px}
+.brandrow .name .k{color:#f5a623}
 h1{font-size:2.1rem;line-height:1.15;margin-bottom:12px}
 h1 .amber{color:#f5a623}
 .tag{color:#b9bdc9;font-size:1.06rem;max-width:520px}
 .cta{display:inline-block;margin:22px 10px 0 0;padding:13px 22px;border-radius:10px;font-weight:700;text-decoration:none}
 .cta.primary{background:#f5a623;color:#1b1f27}
 .cta.ghost{border:2px solid #635bff;color:#fff}
+.vcard{width:340px;max-width:90vw;aspect-ratio:1.586;border-radius:18px;background:linear-gradient(135deg,#635bff,#2d2a6e 70%,#1b1f27);box-shadow:0 18px 50px rgba(0,0,0,.55);padding:22px;display:flex;flex-direction:column;justify-content:space-between;transform:rotate(-4deg)}
+.vcard .top{display:flex;justify-content:space-between;align-items:center}
+.vcard .brand{font-weight:800;letter-spacing:1px;font-size:1.1rem}
+.vcard .brand b{color:#f5a623}
+.vcard .chip{width:44px;height:32px;border-radius:6px;background:linear-gradient(135deg,#f5d78a,#c9982f)}
+.vcard .num{font-family:monospace;font-size:1.25rem;letter-spacing:3px;color:#e8eaf0}
+.vcard .foot{display:flex;justify-content:space-between;font-size:.72rem;color:#cfd2ff;letter-spacing:1px}
 .strip{background:#f5a623;color:#1b1f27;text-align:center;font-weight:700;padding:10px;letter-spacing:.5px;font-size:.95rem}
 .section{max-width:960px;margin:34px auto;padding:0 20px}
 .section h2{font-size:1.3rem;margin-bottom:12px;color:#fff}
@@ -40,6 +47,11 @@ h1 .amber{color:#f5a623}
 .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:10px}
 .card{background:#1b1f27;border:1px solid #2a2f3a;border-left:4px solid #f5a623;border-radius:12px;padding:20px}
 .card h3{font-size:1rem;margin-bottom:6px;color:#fff}.card p{color:#aab0bd;font-size:.9rem;margin:0}
+.trades{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-top:10px}
+.trade{background:#1b1f27;border:1px solid #2a2f3a;border-radius:12px;padding:22px 16px;text-align:center}
+.trade svg{width:52px;height:52px;margin-bottom:10px}
+.trade .t{font-weight:700;color:#fff}
+.trade .s{font-size:.8rem;color:#8b91a0;margin-top:4px}
 .price{background:#1b1f27;border:1px solid #2a2f3a;border-radius:12px;padding:26px;text-align:center}
 .price .big{font-size:1.9rem;font-weight:800;color:#f5a623}
 .steps{background:#1b1f27;border:1px solid #2a2f3a;border-radius:12px;padding:24px;color:#c2c6d0}
@@ -52,53 +64,80 @@ footer a{margin:0 8px}
   <div class="hero-inner">
     <div class="hero-copy">
       <div class="brandrow">
-        <span class="name">CREW<span class="k">KITTY</span></span>
+        <img src="/logo.svg" alt="SaySo logo">
+        <span class="name">Say<span class="k">So</span></span>
       </div>
-      <h1>The crew card that only works <span class="amber">where you say.</span></h1>
-      <p class="tag">Load each hand a balance, approve the businesses it works at, and never chase a receipt again. No credit check. No minimums. Set up before lunch.</p>
+      <h1>The crew card that only works <span class="amber">where you say so.</span></h1>
+      <p class="tag">Load each crew member a balance. Approve the businesses their card works at. Anything else declines — or texts you for a one-tap OK. No credit check. No minimums. Set up before lunch.</p>
       <a class="cta primary" href="/admin">Set up in 15 minutes — free</a>
       <a class="cta ghost" href="/employee">Employee wallet</a>
     </div>
     <div class="hero-art">
-      <img src="/hero.jpg" alt="CrewKitty foreman tomcat mascot in a hard hat and overalls at an oilfield site">
+      <div class="vcard">
+        <div class="top"><span class="brand">Say<b>So</b></span><span class="chip"></span></div>
+        <div class="num">&bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; 4127</div>
+        <div class="foot"><span>YOUR CREW MEMBER</span><span>APPROVED WHERE YOU SAY</span></div>
+      </div>
     </div>
   </div>
 </div>
-<div class="strip">BUILT FOR THE FIELD · NO CREDIT CHECK · NO MINIMUMS · SET UP BEFORE LUNCH</div>
+<div class="strip">BUILT FOR CREWS &middot; NO CREDIT CHECK &middot; TEXT-TO-APPROVE &middot; SET UP BEFORE LUNCH</div>
 
 <div class="section">
-  <h2>What CrewKitty is</h2>
-  <p>CrewKitty is a software service that helps field-service and oilfield businesses control crew spending. A company loads a set dollar amount onto each employee's account and chooses which businesses that money may be spent at. Each crew member gets a virtual company card (usable in Apple Pay or Google Pay) that only works at approved merchants and only up to their available balance. Owners can add funds, freeze a card, or remove an employee at any time.</p>
-  <p>CrewKitty is operated by JA Oilfield Services LLC. It is a spend-management and expense-control tool — we do not sell physical goods.</p>
+  <h2>Built for every crew that spends in the field</h2>
+  <div class="trades">
+    <div class="trade">
+      <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="26" stroke="#f5a623" stroke-width="4"/><path d="M32 14 C38 22 38 28 32 32 C26 28 26 22 32 14 Z M50 32 C42 38 36 38 32 32 C36 26 42 26 50 32 Z M32 50 C26 42 26 36 32 32 C38 36 38 42 32 50 Z M14 32 C22 26 28 26 32 32 C28 38 22 38 14 32 Z" fill="#f5a623"/></svg>
+      <div class="t">HVAC</div><div class="s">Parts houses &amp; supply</div>
+    </div>
+    <div class="trade">
+      <svg viewBox="0 0 64 64" fill="none"><path d="M20 44 L36 28 M36 28 a10 10 0 1 0 8 -14 l-6 6 -4 -4 6 -6 a10 10 0 0 0 -14 8 z" stroke="#f5a623" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="17" cy="47" r="7" stroke="#f5a623" stroke-width="4"/></svg>
+      <div class="t">Plumbing</div><div class="s">Supply runs, no receipts lost</div>
+    </div>
+    <div class="trade">
+      <svg viewBox="0 0 64 64" fill="none"><path d="M32 52 C18 52 12 40 12 26 C26 26 40 32 40 46 M32 52 C32 40 36 30 48 22 M48 22 C50 30 52 44 40 50" stroke="#f5a623" stroke-width="4" stroke-linecap="round"/></svg>
+      <div class="t">Landscaping</div><div class="s">Fuel, mulch &amp; equipment</div>
+    </div>
+    <div class="trade">
+      <svg viewBox="0 0 64 64" fill="none"><path d="M14 42 h36 v8 h-40 v-8 z M20 42 v-10 a12 12 0 0 1 8 -11 v-7 h8 v7 a12 12 0 0 1 8 11 v10" stroke="#f5a623" stroke-width="4" stroke-linejoin="round"/></svg>
+      <div class="t">Construction</div><div class="s">And oilfield, electric, trucking&hellip;</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>What SaySo is</h2>
+  <p>SaySo is a software service that helps businesses control crew spending. A company loads a set dollar amount onto each employee's account and chooses which businesses that money may be spent at. Each crew member gets a virtual company card (usable in Apple Pay or Google Pay) that only works at approved businesses and only up to their available balance. Anything outside the list declines — or sends the owner a text they can approve with one tap. Owners can add funds, freeze a card, or remove an employee at any time.</p>
+  <p>SaySo is operated by JA Oilfield Services LLC. It is a spend-management and expense-control tool — we do not sell physical goods.</p>
 </div>
 
 <div class="section">
   <h2>What you get</h2>
   <div class="grid">
     <div class="card"><h3>Management-set limits</h3><p>Crew members spend only the amount you load — overspending is declined automatically.</p></div>
-    <div class="card"><h3>Approved businesses only</h3><p>Cards work only at the merchants on your list — the local car wash, parts house, fuel stop. Add or remove anytime.</p></div>
-    <div class="card"><h3>Instant control</h3><p>Freeze a card or remove a departing hand in one click; remaining funds return to the company.</p></div>
+    <div class="card"><h3>Approved businesses only</h3><p>Cards work only at the businesses on your list — the supply house, the fuel stop, the nursery. Add or remove anytime.</p></div>
+    <div class="card"><h3>Text-to-approve</h3><p>A swipe outside the rules texts you a one-tap approve link. Say so from anywhere — your crew member just runs the card again.</p></div>
     <div class="card"><h3>No physical cards</h3><p>Virtual cards live in Apple Pay and Google Pay — nothing to print, mail, or activate.</p></div>
   </div>
 </div>
 
 <div class="section">
   <h2>Pricing</h2>
-  <div class="price"><div class="big">Free for your first 2 cards · $10 per active card/month after</div><p style="margin-top:8px;color:#c2c6d0">No per-transaction fees, no setup fees, no contracts. One stolen tank of fuel costs more than CrewKitty does for your whole crew.</p></div>
+  <div class="price"><div class="big">Free for your first 2 cards &middot; $10 per active card/month after</div><p style="margin-top:8px;color:#c2c6d0">No per-transaction fees, no setup fees, no contracts. One padded supply run costs more than SaySo does for your whole crew.</p></div>
 </div>
 
 <div class="section">
   <h2>How it works</h2>
-  <div class="steps"><p>1. Create your free company account — no credit application, no bank minimum.<br>2. Add the businesses your crew is allowed to use.<br>3. Add crew members with a PIN and a starting amount.<br>4. Each hand signs in on their phone, confirms their info, and their card is issued automatically — ready for Apple Pay or Google Pay.<br>5. Top up, freeze, or remove cards anytime from your console. Every swipe anywhere else is declined before the money leaves.</p></div>
+  <div class="steps"><p>1. Create your free company account — no credit application, no bank minimum.<br>2. Fund your wallet straight from your business bank via Stripe.<br>3. Add the businesses your crew is allowed to use, and your crew members with a PIN and a starting amount.<br>4. Each crew member signs in on their phone, confirms their info, and their card is issued automatically — ready for Apple Pay or Google Pay.<br>5. Watch every swipe on your dashboard. Anything outside the rules declines — or texts you for a one-tap OK.</p></div>
 </div>
 
 <div class="section">
   <h2>Contact</h2>
-  <div class="card" style="border-left-color:#635bff"><p style="color:#c2c6d0">CrewKitty — a service of JA Oilfield Services LLC<br>Email: <a href="mailto:jwalterscheid@jaoilfieldservices.com">jwalterscheid@jaoilfieldservices.com</a><br>Odessa, Texas, United States</p></div>
+  <div class="card" style="border-left-color:#635bff"><p style="color:#c2c6d0">SaySo — a service of JA Oilfield Services LLC<br>Email: <a href="mailto:jwalterscheid@jaoilfieldservices.com">jwalterscheid@jaoilfieldservices.com</a><br>Odessa, Texas, United States</p></div>
 </div>
 
-<footer>&copy; 2026 JA Oilfield Services LLC · CrewKitty<br><br><a href="/terms">Terms of Service</a> · <a href="/privacy">Privacy Policy</a> · <a href="mailto:jwalterscheid@jaoilfieldservices.com">Contact</a></footer>
-<!-- CrewKitty support chat -->
+<footer>&copy; 2026 JA Oilfield Services LLC &middot; SaySo<br><br><a href="/terms">Terms of Service</a> &middot; <a href="/privacy">Privacy Policy</a> &middot; <a href="mailto:jwalterscheid@jaoilfieldservices.com">Contact</a></footer>
+<!-- SaySo support chat -->
 <style>
 #ck-chat-btn{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:#635bff;color:#fff;font-size:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.35);z-index:9998}
 #ck-chat{display:none;position:fixed;bottom:88px;right:20px;width:min(360px,calc(100vw - 24px));height:min(520px,calc(100vh - 120px));background:#1b1f27;border:1px solid #2a2f3a;border-radius:14px;flex-direction:column;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:9999;font-family:-apple-system,Segoe UI,Roboto,sans-serif}
@@ -114,7 +153,7 @@ footer a{margin:0 8px}
 </style>
 <div id="ck-chat-btn" onclick="ckToggle()" title="Questions? Chat with us">&#128172;</div>
 <div id="ck-chat">
-  <div class="ck-head">CrewKitty Help<span onclick="ckToggle()">&times;</span></div>
+  <div class="ck-head">SaySo Help<span onclick="ckToggle()">&times;</span></div>
   <div id="ck-msgs"></div>
   <div class="ck-row"><input id="ck-in" placeholder="Ask about cards, declines, setup..." onkeydown="if(event.key==='Enter')ckSend()"><button onclick="ckSend()">Send</button></div>
 </div>
@@ -122,7 +161,7 @@ footer a{margin:0 8px}
 const CK_HIST = [];
 let CK_OPEN = false;
 function ckAdd(cls, text){ const d = document.createElement('div'); d.className = 'ck-m ' + cls; d.textContent = text; document.getElementById('ck-msgs').appendChild(d); d.scrollIntoView({block:'end'}); return d; }
-function ckToggle(){ CK_OPEN = !CK_OPEN; document.getElementById('ck-chat').style.display = CK_OPEN ? 'flex' : 'none'; if (CK_OPEN && !CK_HIST.length) ckAdd('a', "Howdy — I'm the CrewKitty helper. Ask me anything: setting up your crew, why a card declined, adding a card to Apple Pay, pricing, whatever you're stuck on."); }
+function ckToggle(){ CK_OPEN = !CK_OPEN; document.getElementById('ck-chat').style.display = CK_OPEN ? 'flex' : 'none'; if (CK_OPEN && !CK_HIST.length) ckAdd('a', "Howdy — I'm the SaySo helper. Ask me anything: setting up your crew, why a card declined, adding a card to Apple Pay, pricing, whatever you're stuck on."); }
 function ckAuth(){ return { 'Content-Type': 'application/json' }; }
 async function ckSend(){
   const inp = document.getElementById('ck-in'); const v = inp.value.trim(); if (!v) return;
