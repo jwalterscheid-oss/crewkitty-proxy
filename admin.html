@@ -59,6 +59,21 @@
   </div>
 
   <div id="panel" style="display:none">
+    <div class="card" id="dashCard">
+      <h2 style="font-size:1.1rem">Dashboard</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:14px">
+        <div style="background:#f4f6f8;border-radius:10px;padding:14px"><div style="font-size:.75rem;color:#666;font-weight:600">COMPANY WALLET</div><div id="dWallet" style="font-size:1.4rem;font-weight:700">—</div></div>
+        <div style="background:#f4f6f8;border-radius:10px;padding:14px"><div style="font-size:.75rem;color:#666;font-weight:600">ON CREW CARDS</div><div id="dOnCards" style="font-size:1.4rem;font-weight:700">—</div></div>
+        <div style="background:#f4f6f8;border-radius:10px;padding:14px"><div style="font-size:.75rem;color:#666;font-weight:600">ACTIVE CARDS</div><div id="dCards" style="font-size:1.4rem;font-weight:700">—</div></div>
+        <div style="background:#f4f6f8;border-radius:10px;padding:14px"><div style="font-size:.75rem;color:#666;font-weight:600">SPENT THIS MONTH</div><div id="dSpend" style="font-size:1.4rem;font-weight:700">—</div></div>
+      </div>
+      <label style="margin-top:18px">Recent activity</label>
+      <table>
+        <thead><tr><th>When</th><th>Who</th><th>What</th><th>Amount</th></tr></thead>
+        <tbody id="dTxs"><tr><td colspan="4" style="color:#888">Loading…</td></tr></tbody>
+      </table>
+    </div>
+
     <div class="card" id="walletCard">
       <h2 style="font-size:1.1rem">Company wallet</h2>
       <div class="msg" id="walletInfo">Loading…</div>
@@ -145,8 +160,32 @@ async function unlock() {
   await fetch(P+'/api/admin/funding/sync', { method: 'POST', headers: H() }).catch(()=>{});
   loadWallet();
   loadBilling();
+  loadDashboard();
 }
 
+async function loadDashboard() {
+  try {
+    const res = await fetch(P+'/api/admin/dashboard', { headers: H() });
+    const d = await res.json();
+    if (!res.ok) return;
+    document.getElementById('dWallet').textContent = fmt(d.walletCents);
+    document.getElementById('dOnCards').textContent = fmt(d.onCardsCents);
+    document.getElementById('dCards').textContent = d.activeCards;
+    document.getElementById('dSpend').textContent = fmt(d.monthSpendCents);
+    const tb = document.getElementById('dTxs');
+    tb.innerHTML = '';
+    if (!(d.transactions || []).length) { tb.innerHTML = '<tr><td colspan="4" style="color:#888">No activity yet — fund your wallet and add your crew.</td></tr>'; return; }
+    d.transactions.forEach(t => {
+      const tr = document.createElement('tr');
+      const what = t.type === 'payment' ? (t.merchant || (t.description||'').replace(' (card)','') || 'Card payment')
+        : t.type === 'declined' ? '⛔ ' + (t.description || 'Declined')
+        : t.type === 'fund' ? 'Funds loaded' + (t.description ? ' — ' + t.description : '') : (t.description || t.type);
+      const sign = t.type === 'payment' ? '−' : (t.type === 'declined' ? '' : '+');
+      tr.innerHTML = `<td><small>${new Date(t.createdAt).toLocaleString()}</small></td><td>${esc(t.employee || '—')}</td><td>${esc(what)}</td><td><strong>${sign}${fmt(t.amountCents)}</strong></td>`;
+      tb.appendChild(tr);
+    });
+  } catch {}
+}
 async function loadWallet() {
   try {
     const res = await fetch(P+'/api/admin/wallet', { headers: H() });
@@ -343,6 +382,7 @@ async function addEmployee() {
   refreshEmployees();
   loadBilling();
   loadWallet();
+  loadDashboard();
 }
 
 async function fundEmployee(id) {
@@ -358,6 +398,7 @@ async function fundEmployee(id) {
   }
   refreshEmployees();
   loadWallet();
+  loadDashboard();
 }
 
 async function toggleEmployee(id, active) {
@@ -380,6 +421,7 @@ async function delEmployee(id) {
   refreshEmployees();
   loadBilling();
   loadWallet();
+  loadDashboard();
 }
 </script>
 <!-- CrewKitty support chat -->
