@@ -51,8 +51,10 @@
     <input id="semail" type="email" placeholder="you@yourcompany.com">
     <label>Password</label>
     <input id="spw" type="password" placeholder="8+ characters">
-    <button onclick="signup()">Create account</button>
-    <div class="msg">After signup you'll fund your account straight from your business bank (or card) via Stripe, then load balances onto your crew's cards.</div>
+    <label>Starting funds (USD) — loaded from your bank via Stripe</label>
+    <input id="sf" type="number" min="10" step="0.01" placeholder="500.00">
+    <button onclick="signup()">Create account &amp; set up funding</button>
+    <div class="msg">After your account is created you'll go straight to Stripe to connect your business bank (or pay by card) and load these starting funds. That balance is what you put on your crew's cards. Leave blank to fund later.</div>
     <div class="msg" id="signupMsg"></div>
   </div>
 
@@ -206,7 +208,27 @@ async function signup() {
   document.getElementById('lemail').value = document.getElementById('semail').value;
   document.getElementById('lpw').value = document.getElementById('spw').value;
   msg.textContent = 'Account created! Signing you in…';
-  unlock();
+  await unlock();
+  // First-run funding: send the new company straight to Stripe to connect
+  // their bank and load their starting balance.
+  const sf = parseFloat(document.getElementById('sf').value);
+  if (sf >= 10) {
+    msg.textContent = 'Taking you to Stripe to set up funding…';
+    const fres = await fetch(P+'/api/admin/funding/checkout', { method: 'POST', headers: H(), body: JSON.stringify({ amount: sf }) });
+    const fd = await fres.json();
+    if (fres.ok && fd.url) { location.href = fd.url; return; }
+  }
+}
+
+// Shortfall helper: when a wallet doesn't have enough to load a card, offer
+// to jump straight to Stripe funding for the amount they were trying to load.
+async function offerFunding(neededUsd) {
+  const amt = Math.max(10, Math.ceil(neededUsd || 0));
+  if (!confirm(`Not enough in your company wallet. Add $${amt} from your bank or card now? You'll go to Stripe and come right back.`)) return;
+  const res = await fetch(P+'/api/admin/funding/checkout', { method: 'POST', headers: H(), body: JSON.stringify({ amount: amt }) });
+  const d = await res.json();
+  if (res.ok && d.url) location.href = d.url;
+  else alert(d.error || 'Could not start funding');
 }
 
 async function refresh() {
@@ -311,7 +333,11 @@ async function addEmployee() {
     })
   });
   const data = await res.json();
-  if (!res.ok) { msg.innerHTML = `<span class="err">${esc(data.error)}</span>`; return; }
+  if (!res.ok) {
+    msg.innerHTML = `<span class="err">${esc(data.error)}</span>`;
+    if (String(data.error).includes('company wallet')) offerFunding(parseFloat(document.getElementById('ef').value));
+    return;
+  }
   msg.textContent = data.note || data.warning || 'Employee added.';
   document.getElementById('en').value = ''; document.getElementById('ep').value = ''; document.getElementById('ef').value = '';
   refreshEmployees();
@@ -326,7 +352,10 @@ async function fundEmployee(id) {
     method: 'POST', headers: H(), body: JSON.stringify({ amount: amt })
   });
   const data = await res.json();
-  if (!res.ok) alert(data.error || 'Error');
+  if (!res.ok) {
+    if (String(data.error).includes('company wallet')) { offerFunding(parseFloat(amt)); }
+    else alert(data.error || 'Error');
+  }
   refreshEmployees();
   loadWallet();
 }
