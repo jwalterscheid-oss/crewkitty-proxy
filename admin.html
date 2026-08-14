@@ -117,6 +117,22 @@
       <div class="msg">Employees sign in at <a href="/employee" target="_blank">the wallet page</a> with their name + PIN.</div>
     </div>
 
+    <div class="card" id="approvalsCard">
+      <h2 style="font-size:1.1rem">Instant approvals</h2>
+      <div class="msg">When a swipe is at a business not on your list — or over your approval limit — it declines once and you get a text with a one-tap approve link. Approve it and your hand just runs the card again (good for 30 minutes).</div>
+      <label>Your mobile number (approval texts go here)</label>
+      <input id="setPhone" type="tel" inputmode="tel" placeholder="(555) 123-4567">
+      <label>Approval limit (USD, optional — swipes above this need your OK even at approved businesses)</label>
+      <input id="setLimit" type="number" min="1" step="0.01" placeholder="e.g. 250.00 — leave blank for no limit">
+      <button onclick="saveSettings()">Save settings</button>
+      <span class="msg" id="setMsg"></span>
+      <label style="margin-top:18px">Approval requests</label>
+      <table>
+        <thead><tr><th>When</th><th>Who</th><th>Where</th><th>Amount</th><th></th></tr></thead>
+        <tbody id="apRows"><tr><td colspan="5" style="color:#888">None yet</td></tr></tbody>
+      </table>
+    </div>
+
     <div class="card" id="billingCard">
       <h2 style="font-size:1.1rem">Billing</h2>
       <div class="msg" id="billingInfo">Loading…</div>
@@ -162,6 +178,53 @@ async function unlock() {
   loadWallet();
   loadBilling();
   loadDashboard();
+  loadSettings();
+  loadApprovals();
+  // Poll approvals so new requests show up while the console is open.
+  if (!window.__apPoll) window.__apPoll = setInterval(loadApprovals, 20000);
+}
+
+async function loadSettings() {
+  try {
+    const res = await fetch(P+'/api/admin/settings', { headers: H() });
+    const s = await res.json();
+    if (!res.ok) return;
+    if (s.ownerPhone) document.getElementById('setPhone').value = s.ownerPhone;
+    if (s.approvalThresholdUsd) document.getElementById('setLimit').value = s.approvalThresholdUsd;
+    if (!s.smsConfigured) document.getElementById('setMsg').textContent = 'Texting is not switched on yet — approvals still show below and in your texts once it is.';
+  } catch {}
+}
+async function saveSettings() {
+  const msg = document.getElementById('setMsg'); msg.textContent = 'Saving…';
+  const res = await fetch(P+'/api/admin/settings', { method: 'POST', headers: H(), body: JSON.stringify({ ownerPhone: document.getElementById('setPhone').value, approvalThresholdUsd: document.getElementById('setLimit').value }) });
+  const d = await res.json();
+  msg.textContent = res.ok ? 'Saved.' : (d.error || 'Could not save');
+}
+async function loadApprovals() {
+  try {
+    const res = await fetch(P+'/api/admin/approvals', { headers: H() });
+    const list = await res.json();
+    if (!res.ok) return;
+    const tb = document.getElementById('apRows');
+    tb.innerHTML = '';
+    if (!list.length) { tb.innerHTML = '<tr><td colspan="5" style="color:#888">None yet</td></tr>'; return; }
+    list.forEach(a => {
+      const tr = document.createElement('tr');
+      const badge = a.status === 'pending' ? '<span class="badge pend">Pending</span>'
+        : a.status === 'approved' ? '<span class="badge on">Approved</span>'
+        : a.status === 'used' ? '<span class="badge on">Used</span>'
+        : '<span class="badge off">' + esc(a.status) + '</span>';
+      tr.innerHTML = `<td><small>${new Date(a.createdAt).toLocaleString()}</small></td><td>${esc(a.employee || '—')}</td><td>${esc(a.merchant || '')}</td><td><strong>${fmt(a.amountCents)}</strong></td>
+        <td>${a.status === 'pending' ? `<button class="small" onclick="decideApproval('${a.id}','approve')">Approve</button><button class="small danger" onclick="decideApproval('${a.id}','deny')">Deny</button>` : badge}</td>`;
+      tb.appendChild(tr);
+    });
+  } catch {}
+}
+async function decideApproval(id, action) {
+  const res = await fetch(`${P}/api/admin/approvals/${id}`, { method: 'POST', headers: H(), body: JSON.stringify({ action }) });
+  const d = await res.json();
+  if (!res.ok) alert(d.error || 'Error');
+  loadApprovals();
 }
 
 async function loadDashboard() {
