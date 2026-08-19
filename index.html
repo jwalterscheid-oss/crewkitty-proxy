@@ -9,12 +9,12 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/logo.png">
 <link rel="apple-touch-icon" href="/logo.png">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://crewkitty.com/">
+<meta property="og:url" content="https://saysocard.com/">
 <meta property="og:title" content="SaySo — The crew card that only works where you say so">
 <meta property="og:description" content="Load each crew member a balance, approve the businesses their card works at, and OK anything else with a one-tap text. No credit check. No minimums.">
-<meta property="og:image" content="https://crewkitty.com/logo.png">
+<meta property="og:image" content="https://saysocard.com/logo.png">
 <meta name="twitter:card" content="summary">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"SaySo","url":"https://crewkitty.com","logo":"https://crewkitty.com/logo.png","email":"jwalterscheid@jaoilfieldservices.com","parentOrganization":{"@type":"Organization","name":"JA Oilfield Services LLC"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"SaySo","url":"https://saysocard.com","logo":"https://saysocard.com/logo.png","email":"saysosupport@gmail.com","parentOrganization":{"@type":"Organization","name":"JA Oilfield Services LLC"}}</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#13161c;color:#e8eaf0;line-height:1.55}
@@ -133,10 +133,10 @@ footer a{margin:0 8px}
 
 <div class="section">
   <h2>Contact</h2>
-  <div class="card" style="border-left-color:#635bff"><p style="color:#c2c6d0">SaySo — a service of JA Oilfield Services LLC<br>Email: <a href="mailto:jwalterscheid@jaoilfieldservices.com">jwalterscheid@jaoilfieldservices.com</a><br>Odessa, Texas, United States</p></div>
+  <div class="card" style="border-left-color:#635bff"><p style="color:#c2c6d0">SaySo — a service of JA Oilfield Services LLC<br>Email: <a href="mailto:saysosupport@gmail.com">saysosupport@gmail.com</a><br>Odessa, Texas, United States</p></div>
 </div>
 
-<footer>&copy; 2026 JA Oilfield Services LLC &middot; SaySo<br><br><a href="/terms">Terms of Service</a> &middot; <a href="/privacy">Privacy Policy</a> &middot; <a href="mailto:jwalterscheid@jaoilfieldservices.com">Contact</a></footer>
+<footer>&copy; 2026 JA Oilfield Services LLC &middot; SaySo<br><br><a href="/terms">Terms of Service</a> &middot; <a href="/privacy">Privacy Policy</a> &middot; <a href="mailto:saysosupport@gmail.com">Contact</a></footer>
 <!-- SaySo support chat -->
 <style>
 #ck-chat-btn{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:#635bff;color:#fff;font-size:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.35);z-index:9998}
@@ -170,7 +170,7 @@ async function ckSend(){
   try {
     const res = await fetch('/api/support/chat', { method:'POST', headers: ckAuth(), body: JSON.stringify({ messages: CK_HIST.slice(-12) }) });
     const d = await res.json();
-    t.textContent = d.reply || d.error || 'Something went wrong — email jwalterscheid@jaoilfieldservices.com';
+    t.textContent = d.reply || d.error || 'Something went wrong — email saysosupport@gmail.com';
     CK_HIST.push({role:'assistant', content:t.textContent});
   } catch (e) { t.textContent = 'Connection trouble — try again in a moment.'; }
 }

@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="apple-touch-icon" href="/logo.png">
+<title>SaySo — Step-by-step walkthrough / Guía paso a paso</title>
+<meta name="description" content="How to set up SaySo and get your crew's cards working, in English and Spanish.">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --ink:#1a1a2e; --muted:#6b7280; --line:#e6e8ec;
+    --amber:#f5a623; --purple:#635bff; --green:#0f9d58; --red:#c0392b;
+    --panel:#fff;
+  }
+  body{font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:linear-gradient(160deg,#1b1f27 0%,#13161c 55%,#221c10 100%);
+    background-attachment:fixed;color:var(--ink);min-height:100vh;
+    -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1000px;margin:0 auto;padding:28px 16px 60px}
+
+  /* ---------- header ---------- */
+  header{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-bottom:22px}
+  .brand{font-size:1.6rem;font-weight:800;color:#fff;letter-spacing:-.02em;
+    text-shadow:0 2px 12px rgba(0,0,0,.6)}
+  .brand i{font-style:normal;color:var(--amber)}
+  .tagline{color:#b8bec9;font-size:.9rem;flex:1;min-width:180px}
+  .langs{display:flex;background:rgba(255,255,255,.08);border-radius:999px;padding:3px;
+    border:1px solid rgba(255,255,255,.14)}
+  .langs button{background:none;border:0;color:#cfd4dd;font:inherit;font-size:.85rem;
+    font-weight:700;padding:7px 16px;border-radius:999px;cursor:pointer;transition:.18s}
+  .langs button[aria-pressed="true"]{background:var(--amber);color:#1b1f27}
+
+  /* ---------- track tabs ---------- */
+  .tracks{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+  .tracks button{flex:1;min-width:150px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);
+    color:#cfd4dd;font:inherit;font-weight:700;font-size:.92rem;padding:13px 14px;border-radius:12px;cursor:pointer;
+    text-align:left;line-height:1.35;transition:.18s}
+  .tracks button small{display:block;font-weight:500;font-size:.78rem;color:#98a0ad;margin-top:2px}
+  .tracks button[aria-pressed="true"]{background:var(--panel);color:var(--ink);border-color:var(--panel)}
+  .tracks button[aria-pressed="true"] small{color:var(--muted)}
+
+  /* ---------- stage ---------- */
+  .stage{background:var(--panel);border-radius:16px;border-top:4px solid var(--amber);
+    box-shadow:0 12px 40px rgba(0,0,0,.35);overflow:hidden}
+  .bar{height:4px;background:#eef0f3}
+  .bar span{display:block;height:100%;background:var(--amber);width:0;transition:width .45s cubic-bezier(.4,0,.2,1)}
+  .grid{display:grid;grid-template-columns:1fr 320px;gap:0}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}}
+  .copy{padding:30px 30px 24px}
+  .step-no{display:inline-flex;align-items:center;gap:8px;font-size:.74rem;font-weight:800;
+    letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+  .step-no b{background:var(--amber);color:#1b1f27;width:24px;height:24px;border-radius:12px;
+    display:inline-flex;align-items:center;justify-content:center;font-size:.8rem}
+  h2{font-size:1.5rem;margin:14px 0 10px;line-height:1.22;letter-spacing:-.01em}
+  .lede{font-size:1rem;line-height:1.6;color:#3d4451}
+  ul.pts{list-style:none;margin:18px 0 0}
+  ul.pts li{position:relative;padding:0 0 0 26px;margin-bottom:11px;font-size:.94rem;line-height:1.55;color:#3d4451}
+  ul.pts li::before{content:"";position:absolute;left:6px;top:8px;width:7px;height:7px;
+    border-radius:4px;background:var(--amber)}
+  .note{margin-top:20px;padding:14px 16px;border-radius:10px;font-size:.88rem;line-height:1.55;
+    background:#fff8e8;border:1px solid #f3dfae;color:#6b4e0e}
+  .note b{color:#8a5b00}
+  .note.warn{background:#fdeeec;border-color:#f3c6c0;color:#8c2f22}
+  .note.warn b{color:#8c2f22}
+
+  /* ---------- animated device panel ---------- */
+  .viz{background:linear-gradient(170deg,#20242d,#14171d);display:flex;align-items:center;
+    justify-content:center;padding:28px 20px;border-left:1px solid #e6e8ec}
+  @media(max-width:760px){.viz{border-left:0;border-top:1px solid #e6e8ec;padding:26px 20px}}
+  .phone{width:214px;height:404px;border-radius:30px;background:#0d0f14;padding:9px;
+    box-shadow:0 18px 44px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.09);position:relative}
+  .phone::before{content:"";position:absolute;top:15px;left:50%;transform:translateX(-50%);
+    width:56px;height:5px;border-radius:3px;background:#272b33;z-index:3}
+  .screen{width:100%;height:100%;border-radius:23px;background:#f4f6f8;overflow:hidden;
+    position:relative;display:flex;flex-direction:column}
+  .scr-top{background:#fff;padding:22px 13px 10px;font-size:.72rem;font-weight:800;color:#1a1a2e;
+    border-bottom:1px solid #edeff2;flex-shrink:0}
+  .scr-top i{font-style:normal;color:var(--amber)}
+  .scr-body{padding:11px;display:flex;flex-direction:column;gap:8px;flex:1;overflow:hidden}
+  .fld{background:#fff;border:1px solid #dfe3e9;border-radius:7px;padding:7px 9px;font-size:.62rem;color:#8b93a1}
+  .fld.filled{color:#1a1a2e;font-weight:600;border-color:#c9cfd8}
+  .fld.focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(99,91,255,.16)}
+  .lbl{font-size:.56rem;font-weight:800;color:#7a828f;text-transform:uppercase;letter-spacing:.06em}
+  .btn{background:var(--purple);color:#fff;text-align:center;border-radius:7px;padding:8px;
+    font-size:.66rem;font-weight:700}
+  .btn.amber{background:var(--amber);color:#1b1f27}
+  .btn.ghost{background:#fff;color:var(--purple);border:1px solid #d5d8e6}
+  .tile{background:#fff;border-radius:9px;padding:10px}
+  .tile .big{font-size:1.32rem;font-weight:800;letter-spacing:-.02em}
+  .tile .sm{font-size:.58rem;color:#7a828f;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+  .cardart{background:linear-gradient(125deg,#1f232b,#33261a 78%);border-radius:10px;padding:11px;
+    color:#fff;position:relative;overflow:hidden;min-height:66px}
+  .cardart::after{content:"";position:absolute;right:-16px;bottom:-22px;width:76px;height:76px;
+    border-radius:40px;background:rgba(245,166,35,.19)}
+  .cardart .num{font-size:.72rem;letter-spacing:.1em;margin-top:14px;font-weight:600}
+  .cardart .nm{font-size:.55rem;opacity:.72;text-transform:uppercase;letter-spacing:.09em}
+  .chip{display:inline-block;font-size:.55rem;font-weight:800;padding:2px 7px;border-radius:9px}
+  .chip.ok{background:#d1fae5;color:#065f46}
+  .chip.bad{background:#fee2e2;color:#991b1b}
+  .chip.wait{background:#fef3c7;color:#92400e}
+  .row{display:flex;gap:6px;align-items:center}
+  .otp{display:flex;gap:5px;justify-content:center;margin-top:4px}
+  .otp span{width:22px;height:28px;border:1px solid #d5d9e0;border-radius:5px;background:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.72rem}
+  .wallet-hdr{background:#000;color:#fff;padding:9px 11px;font-size:.66rem;font-weight:700;
+    display:flex;justify-content:space-between;align-items:center}
+  .menu-item{background:#fff;padding:8px 10px;font-size:.63rem;border-bottom:1px solid #eef0f3;
+    display:flex;justify-content:space-between;align-items:center;color:#1a1a2e}
+  .menu-item.hl{background:#fff6e4;font-weight:700}
+  .tap{position:absolute;width:26px;height:26px;border-radius:13px;border:2px solid var(--amber);
+    background:rgba(245,166,35,.28);pointer-events:none;opacity:0}
+  .fade{animation:fade .5s ease both}
+  @keyframes fade{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+  .pulse{animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+  .tapgo{animation:tapgo 1.9s ease-in-out infinite}
+  @keyframes tapgo{0%,58%{opacity:0;transform:scale(.55)}70%{opacity:1;transform:scale(1)}
+    86%{opacity:.75;transform:scale(1.5)}100%{opacity:0;transform:scale(1.9)}}
+
+  /* ---------- controls ---------- */
+  .ctrls{display:flex;align-items:center;gap:10px;padding:16px 30px 26px;border-top:1px solid var(--line);
+    flex-wrap:wrap}
+  .ctrls button{font:inherit;font-weight:700;font-size:.88rem;padding:10px 18px;border-radius:9px;
+    border:1px solid #d7dbe2;background:#fff;color:var(--ink);cursor:pointer;transition:.15s}
+  .ctrls button:hover:not(:disabled){border-color:#b6bcc7}
+  .ctrls button.primary{background:var(--purple);border-color:var(--purple);color:#fff}
+  .ctrls button:disabled{opacity:.4;cursor:default}
+  .dots{display:flex;gap:6px;margin-left:auto}
+  .dots i{width:8px;height:8px;border-radius:4px;background:#d7dbe2;cursor:pointer;transition:.2s}
+  .dots i.on{background:var(--amber);width:22px}
+  .playbtn{margin-left:0}
+
+  /* ---------- footer ---------- */
+  .foot{margin-top:22px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .foot a{text-decoration:none}
+  .foot .dl{display:inline-block;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);
+    color:#e7eaef;font-size:.85rem;font-weight:600;padding:10px 16px;border-radius:9px;transition:.15s}
+  .foot .dl:hover{background:rgba(255,255,255,.15)}
+  .foot .spacer{flex:1}
+  .help{color:#98a0ad;font-size:.82rem}
+  .help a{color:var(--amber)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">Say<i>$</i>o</div>
+    <div class="tagline" data-t="tagline"></div>
+    <div class="langs" role="group">
+      <button id="btn-en" onclick="setLang('en')" aria-pressed="true">English</button>
+      <button id="btn-es" onclick="setLang('es')" aria-pressed="false">Español</button>
+    </div>
+  </header>
+
+  <div class="tracks">
+    <button id="tr-owner" onclick="setTrack('owner')" aria-pressed="true">
+      <span data-t="trackOwner"></span><small data-t="trackOwnerSub"></small>
+    </button>
+    <button id="tr-crew" onclick="setTrack('crew')" aria-pressed="false">
+      <span data-t="trackCrew"></span><small data-t="trackCrewSub"></small>
+    </button>
+  </div>
+
+  <div class="stage">
+    <div class="bar"><span id="bar"></span></div>
+    <div class="grid">
+      <div class="copy">
+        <div class="step-no"><b id="sNum">1</b><span id="sOf"></span></div>
+        <h2 id="sTitle"></h2>
+        <p class="lede" id="sLede"></p>
+        <ul class="pts" id="sPts"></ul>
+        <div class="note" id="sNote" style="display:none"></div>
+      </div>
+      <div class="viz"><div class="phone"><div class="screen" id="screen"></div></div></div>
+    </div>
+    <div class="ctrls">
+      <button id="prev" onclick="go(-1)" data-t="back"></button>
+      <button id="next" class="primary" onclick="go(1)" data-t="next"></button>
+      <button id="play" class="playbtn" onclick="togglePlay()"></button>
+      <div class="dots" id="dots"></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <a href="/guides/sayso-owner-guide.pdf" download><span class="dl" data-t="dlOwner"></span></a>
+    <a href="/guides/sayso-crew-guide.pdf" download><span class="dl" data-t="dlCrew"></span></a>
+    <div class="spacer"></div>
+    <div class="help" data-t="help"></div>
+  </div>
+
+</div>
+
+<script>
+/* ------------------------------------------------------------------ *
+ * Content. Every string exists in both languages; the Spanish is the
+ * shop-floor register a crew member actually reads, not a literal
+ * word-for-word translation of the English.
+ * ------------------------------------------------------------------ */
+const UI = {
+  en: {
+    tagline: "Set up your company and get your crew's cards working — step by step.",
+    trackOwner: "For the owner", trackOwnerSub: "Set up the company, fund it, add your crew",
+    trackCrew: "For the crew", trackCrewSub: "Activate your card and put it on your phone",
+    back: "Back", next: "Next", done: "Start over", play: "Play", pause: "Pause",
+    of: (a,b) => `Step ${a} of ${b}`,
+    dlOwner: "↓ Owner guide (PDF, EN/ES)", dlCrew: "↓ Crew guide (PDF, EN/ES)",
+    help: 'Questions? saysosupport@gmail.com'
+  },
+  es: {
+    tagline: "Configura tu empresa y haz que funcionen las tarjetas de tu equipo — paso a paso.",
+    trackOwner: "Para el dueño", trackOwnerSub: "Configura la empresa, deposita fondos, agrega al equipo",
+    trackCrew: "Para el equipo", trackCrewSub: "Activa tu tarjeta y agrégala al teléfono",
+    back: "Atrás", next: "Siguiente", done: "Empezar de nuevo", play: "Reproducir", pause: "Pausa",
+    of: (a,b) => `Paso ${a} de ${b}`,
+    dlOwner: "↓ Guía del dueño (PDF, EN/ES)", dlCrew: "↓ Guía del equipo (PDF, EN/ES)",
+    help: '¿Preguntas? saysosupport@gmail.com'
+  }
+};
+
+const STEPS = {
+  owner: [
+    {
+      viz: "signup",
+      en: { t: "Create your company account",
+        l: "Go to saysocard.com and create the account with your work email. This is the login you will use to run everything.",
+        p: ["Use an email you actually check — approval alerts and receipts go there.",
+            "Pick a password you can share with whoever else runs the office.",
+            "You can enter starting funds now or leave it blank and fund later."] },
+      es: { t: "Crea la cuenta de tu empresa",
+        l: "Entra a saysocard.com y crea la cuenta con tu correo de trabajo. Con ese correo vas a administrar todo.",
+        p: ["Usa un correo que revises — ahí llegan las alertas de aprobación y los recibos.",
+            "Elige una contraseña que puedas compartir con quien más maneje la oficina.",
+            "Puedes poner fondos iniciales ahora o dejarlo en blanco y depositar después."] }
+    },
+    {
+      viz: "fund",
+      en: { t: "Put money in the company wallet",
+        l: "The company wallet is the pot. Everything your crew spends comes out of it, so it has to have money in it before a card will work.",
+        p: ["Bank transfer (ACH) is cheapest but takes a few business days to clear.",
+            "Paying by card posts right away — use it the first time so you are not waiting.",
+            "You can top up any time from the Company wallet section."],
+        n: "<b>Plan ahead.</b> A card declines the moment the wallet is empty, even if the crew card shows a balance. Keep a cushion." },
+      es: { t: "Deposita dinero en la billetera de la empresa",
+        l: "La billetera de la empresa es la bolsa común. Todo lo que gasta tu equipo sale de ahí, así que necesita fondos antes de que una tarjeta funcione.",
+        p: ["La transferencia bancaria (ACH) es la más barata pero tarda unos días hábiles.",
+            "Pagar con tarjeta entra de inmediato — úsalo la primera vez para no esperar.",
+            "Puedes agregar más en cualquier momento desde la sección Billetera de la empresa."],
+        n: "<b>Planea con tiempo.</b> La tarjeta se rechaza en cuanto la billetera queda vacía, aunque la tarjeta del trabajador muestre saldo. Deja un colchón." }
+    },
+    {
+      viz: "merchants",
+      en: { t: "Approve the businesses your crew can buy from",
+        l: "Add the parts houses, fuel stops and supply shops your crew actually uses. Anything not on the list declines by default.",
+        p: ["Card allowlist is the simple option — no bank details needed from the business.",
+            "A swipe somewhere not on the list declines once and texts you a one-tap approve link.",
+            "Approve it and your hand runs the card again — good for 30 minutes."] },
+      es: { t: "Aprueba los negocios donde puede comprar tu equipo",
+        l: "Agrega las refaccionarias, gasolineras y proveedores que tu equipo realmente usa. Lo que no esté en la lista se rechaza.",
+        p: ["La lista de tarjeta es la opción simple — no necesitas datos bancarios del negocio.",
+            "Si pasan la tarjeta en un lugar fuera de la lista, se rechaza una vez y te llega un mensaje con un enlace para aprobar.",
+            "Apruebas y tu trabajador vuelve a pasar la tarjeta — válido por 30 minutos."] }
+    },
+    {
+      viz: "addemp",
+      en: { t: "Add your crew",
+        l: "Add each person with their name and a 4–6 digit PIN. Give them a starting balance out of the company wallet if you want.",
+        p: ["The PIN is how they sign in at the wallet page — tell it to them directly.",
+            "You are not issuing the card here. They issue it themselves in the next step.",
+            "You can add funds, freeze a card, or remove someone at any time."] },
+      es: { t: "Agrega a tu equipo",
+        l: "Agrega a cada persona con su nombre y un PIN de 4 a 6 dígitos. Si quieres, dales un saldo inicial de la billetera de la empresa.",
+        p: ["Con ese PIN entran a la página de la billetera — dáselos en persona.",
+            "Aquí no estás emitiendo la tarjeta. Ellos la emiten en el siguiente paso.",
+            "Puedes agregar fondos, congelar una tarjeta o quitar a alguien cuando quieras."] }
+    },
+    {
+      viz: "identity",
+      en: { t: "Your crew activate their own cards",
+        l: "Send each person to saysocard.com/employee. They sign in with their name and PIN, then confirm their email, mobile number and date of birth, and agree to the cardholder terms. The card issues on the spot.",
+        p: ["Date of birth is not optional — the bank verifies identity against it.",
+            "Without it the card stays locked: it declines everywhere and will not add to a phone.",
+            "Nobody in your office needs to collect this. Each person enters their own."],
+        n: "<b>Why it matters.</b> This one field is the most common reason a brand-new card does not work. The wallet page asks for it up front so it does not bite you later." },
+      es: { t: "Tu equipo activa sus propias tarjetas",
+        l: "Manda a cada persona a saysocard.com/employee. Entran con su nombre y PIN, confirman su correo, su celular y su fecha de nacimiento, y aceptan los términos del titular. La tarjeta se emite al instante.",
+        p: ["La fecha de nacimiento no es opcional — el banco verifica la identidad con ella.",
+            "Sin ella la tarjeta queda bloqueada: se rechaza en todos lados y no se puede agregar al teléfono.",
+            "Nadie en tu oficina tiene que recoger este dato. Cada quien pone el suyo."],
+        n: "<b>Por qué importa.</b> Este dato es la razón más común de que una tarjeta nueva no funcione. La página lo pide desde el principio para evitarte el problema." }
+    },
+    {
+      viz: "watch",
+      en: { t: "Watch the money",
+        l: "The dashboard shows the company wallet, what is loaded on crew cards, how many cards are active, and what has been spent this month.",
+        p: ["A card showing <b>Locked</b> means the issuer is still waiting on something — the console tells you exactly what.",
+            "Use “Re-check cards with the issuer” after someone finishes verifying.",
+            "Freeze a card, disable a person, or pull their remaining balance back at any time."] },
+      es: { t: "Vigila el dinero",
+        l: "El panel muestra la billetera de la empresa, cuánto está cargado en las tarjetas, cuántas tarjetas están activas y lo gastado este mes.",
+        p: ["Una tarjeta que dice <b>Locked</b> significa que al banco todavía le falta algo — la consola te dice qué.",
+            "Usa “Re-check cards with the issuer” después de que alguien termine de verificarse.",
+            "Congela una tarjeta, desactiva a una persona o recupera su saldo cuando quieras."] }
+    }
+  ],
+  crew: [
+    {
+      viz: "signin",
+      en: { t: "Sign in to your wallet",
+        l: "On your phone, go to saysocard.com/employee. Type your name exactly the way your boss entered it, and your PIN.",
+        p: ["Your boss gives you the PIN — 4 to 6 digits.",
+            "Add the page to your home screen so it is one tap next time.",
+            "If your name will not take, ask the office how it is spelled in the system."] },
+      es: { t: "Entra a tu billetera",
+        l: "En tu teléfono entra a saysocard.com/employee. Escribe tu nombre tal como lo puso tu patrón, y tu PIN.",
+        p: ["Tu patrón te da el PIN — de 4 a 6 dígitos.",
+            "Agrega la página a la pantalla de inicio para entrar con un toque.",
+            "Si no acepta tu nombre, pregunta en la oficina cómo está escrito en el sistema."] }
+    },
+    {
+      viz: "identity",
+      en: { t: "Activate your card",
+        l: "Enter your email, your mobile number and your date of birth, then check the box agreeing to the cardholder terms. Tap Activate my card.",
+        p: ["The bank that issues the card uses your date of birth to confirm who you are.",
+            "Use a mobile number that can receive texts — you will need it in a minute.",
+            "Your card appears right away with a balance your boss loaded."],
+        n: "<b>Skip the date of birth and the card will not work.</b> It stays locked, declines at the register, and your phone will refuse to add it." },
+      es: { t: "Activa tu tarjeta",
+        l: "Pon tu correo, tu número de celular y tu fecha de nacimiento, y marca la casilla aceptando los términos del titular. Toca Activate my card.",
+        p: ["El banco que emite la tarjeta usa tu fecha de nacimiento para confirmar quién eres.",
+            "Usa un celular que reciba mensajes de texto — lo vas a necesitar en un minuto.",
+            "Tu tarjeta aparece de inmediato con el saldo que cargó tu patrón."],
+        n: "<b>Sin la fecha de nacimiento la tarjeta no sirve.</b> Se queda bloqueada, se rechaza en la caja, y tu teléfono no la va a aceptar." }
+    },
+    {
+      viz: "showcard",
+      en: { t: "Show your card details",
+        l: "Tap “Show card details”. Your card number, expiry date and CVC appear on screen. Keep them private — this is a real card number.",
+        p: ["It is a virtual card. There is no plastic in the mail.",
+            "The numbers only show while you are signed in.",
+            "If the screen says Locked instead, finish the verification step first."] },
+      es: { t: "Muestra los datos de tu tarjeta",
+        l: "Toca “Show card details”. Aparecen el número, la fecha de vencimiento y el CVC. Manténlos privados — es un número de tarjeta real.",
+        p: ["Es una tarjeta virtual. No llega ningún plástico por correo.",
+            "Los números solo se ven mientras estás dentro de tu cuenta.",
+            "Si en vez de eso dice Locked, primero termina el paso de verificación."] }
+    },
+    {
+      viz: "addwallet",
+      en: { t: "Add it to your phone",
+        l: "Open the <b>Wallet</b> app on your phone. Tap <b>+</b>, then <b>Debit or Credit Card</b>, then <b>Enter Card Details Manually</b>. Type in the number, expiry and CVC.",
+        p: ["iPhone: the Wallet app. Android: Google Wallet. Both work the same way.",
+            "Type the numbers carefully — a wrong digit reads as “card not supported”.",
+            "Your name and the Carlsbad billing address are already on file."] },
+      es: { t: "Agrégala a tu teléfono",
+        l: "Abre la app <b>Wallet</b> en tu teléfono. Toca <b>+</b>, luego <b>Tarjeta de débito o crédito</b>, y después <b>Ingresar datos manualmente</b>. Escribe el número, la fecha y el CVC.",
+        p: ["iPhone: la app Wallet. Android: Google Wallet. Funcionan igual.",
+            "Escribe los números con cuidado — un dígito mal se ve como “tarjeta no compatible”.",
+            "Tu nombre y la dirección de facturación de Carlsbad ya están registrados."] }
+    },
+    {
+      viz: "otp",
+      en: { t: "Confirm the 6-digit code",
+        l: "Your phone asks the bank to verify the card. A 6-digit code comes to your mobile number or your email. Type it in and the card lands in your wallet.",
+        p: ["The code arrives within a minute — check your texts first, then email.",
+            "If nothing comes, make sure the number on your activation screen is right.",
+            "Once it is in, the card shows up on your lock screen like any other."] },
+      es: { t: "Confirma el código de 6 dígitos",
+        l: "Tu teléfono le pide al banco que verifique la tarjeta. Llega un código de 6 dígitos a tu celular o a tu correo. Escríbelo y la tarjeta queda en tu wallet.",
+        p: ["El código llega en menos de un minuto — revisa primero los mensajes, luego el correo.",
+            "Si no llega nada, revisa que el número en tu pantalla de activación esté bien.",
+            "Ya adentro, la tarjeta aparece en tu pantalla de bloqueo como cualquier otra."] }
+    },
+    {
+      viz: "pay",
+      en: { t: "Pay at the counter",
+        l: "Hold your phone to the card reader like any other tap payment. The amount comes out of your balance and your boss sees it right away.",
+        p: ["Only businesses your boss approved will go through.",
+            "Somewhere new declines once and texts your boss for a one-tap approval.",
+            "Once they approve it, run the card again — you have 30 minutes."] },
+      es: { t: "Paga en la caja",
+        l: "Acerca tu teléfono al lector como cualquier otro pago sin contacto. El monto sale de tu saldo y tu patrón lo ve al instante.",
+        p: ["Solo pasan los negocios que tu patrón aprobó.",
+            "Un lugar nuevo se rechaza una vez y le manda un mensaje a tu patrón para aprobar.",
+            "En cuanto aprueba, vuelve a pasar la tarjeta — tienes 30 minutos."] }
+    },
+    {
+      viz: "trouble",
+      en: { t: "If something does not work",
+        l: "Almost every problem is one of three things. Check them in this order before calling the office.",
+        p: ["<b>Card says Locked</b> — open the wallet page and finish “Finish verifying your identity”.",
+            "<b>Declined at the register</b> — check your balance, then whether that business is approved.",
+            "<b>Phone will not add the card</b> — the card is not active yet. Fix that first, then try again."],
+        n: "<b>A phone refusing your card is almost never the phone.</b> It means the card is not active. Open the wallet page and read what it says at the top." },
+      es: { t: "Si algo no funciona",
+        l: "Casi todos los problemas son una de tres cosas. Revísalas en este orden antes de llamar a la oficina.",
+        p: ["<b>La tarjeta dice Locked</b> — abre la página de la billetera y completa “Finish verifying your identity”.",
+            "<b>Rechazada en la caja</b> — revisa tu saldo, y luego si ese negocio está aprobado.",
+            "<b>El teléfono no acepta la tarjeta</b> — la tarjeta todavía no está activa. Arregla eso primero."],
+        n: "<b>Que el teléfono rechace tu tarjeta casi nunca es culpa del teléfono.</b> Significa que la tarjeta no está activa. Abre la página de la billetera y lee lo que dice arriba." }
+    }
+  ]
+};
+
+/* ------------------------------------------------------------------ *
+ * Animated mock screens — one per step, drawn from the same primitives
+ * so the walkthrough reads as one product rather than seven pictures.
+ * ------------------------------------------------------------------ */
+const VIZ = {
+  signup: () => `
+    <div class="scr-top">Say<i>$</i>o</div>
+    <div class="scr-body">
+      <div class="lbl">Company name</div><div class="fld filled">J&amp;A Oilfield Services</div>
+      <div class="lbl">Work email</div><div class="fld filled">office@company.com</div>
+      <div class="lbl">Password</div><div class="fld focus">••••••••</div>
+      <div class="btn" style="margin-top:4px">Create account</div>
+    </div>`,
+  fund: () => `
+    <div class="scr-top">Company wallet</div>
+    <div class="scr-body">
+      <div class="tile"><div class="sm">Wallet balance</div><div class="big">$5,000.00</div></div>
+      <div class="lbl">Add funds</div>
+      <div class="fld filled">$2,500.00</div>
+      <div class="btn ghost">Bank transfer · 2–3 days</div>
+      <div class="btn">Card · instant</div>
+    </div>`,
+  merchants: () => `
+    <div class="scr-top">Approved businesses</div>
+    <div class="scr-body">
+      <div class="menu-item">Permian Parts &amp; Supply <span class="chip ok">on</span></div>
+      <div class="menu-item">Loves Travel Stop #402 <span class="chip ok">on</span></div>
+      <div class="menu-item">Carlsbad Welding Gas <span class="chip ok">on</span></div>
+      <div class="menu-item hl">+ Add a business</div>
+      <div class="btn" style="margin-top:auto">Add business</div>
+    </div>`,
+  addemp: () => `
+    <div class="scr-top">Add employee</div>
+    <div class="scr-body">
+      <div class="lbl">Name</div><div class="fld filled">Luis Rios</div>
+      <div class="lbl">PIN</div><div class="fld filled">••••</div>
+      <div class="lbl">Initial funds</div><div class="fld focus">$500.00</div>
+      <div class="btn">Add employee</div>
+      <div class="menu-item" style="border-radius:7px;margin-top:4px">Luis Rios <span class="chip wait">awaiting activation</span></div>
+    </div>`,
+  identity: () => `
+    <div class="scr-top">Activate your card</div>
+    <div class="scr-body">
+      <div class="lbl">Email</div><div class="fld filled">lrios@company.com</div>
+      <div class="lbl">Mobile</div><div class="fld filled">(575) 341-0884</div>
+      <div class="lbl">Date of birth</div><div class="fld focus pulse">MM / DD / YYYY</div>
+      <div class="row" style="font-size:.58rem;color:#5b6270;margin-top:2px">
+        <span style="width:11px;height:11px;border:1px solid var(--purple);border-radius:3px;background:var(--purple);color:#fff;font-size:.5rem;display:flex;align-items:center;justify-content:center">✓</span>
+        I agree to the cardholder terms
+      </div>
+      <div class="btn amber">Activate my card</div>
+    </div>`,
+  watch: () => `
+    <div class="scr-top">Dashboard</div>
+    <div class="scr-body">
+      <div class="row" style="gap:7px">
+        <div class="tile" style="flex:1"><div class="sm">Wallet</div><div class="big" style="font-size:.98rem">$4,120</div></div>
+        <div class="tile" style="flex:1"><div class="sm">On cards</div><div class="big" style="font-size:.98rem">$1,880</div></div>
+      </div>
+      <div class="menu-item" style="border-radius:7px">Luis Rios <span class="chip ok">active</span></div>
+      <div class="menu-item" style="border-radius:7px">Marco Diaz <span class="chip bad">locked</span></div>
+      <div style="font-size:.54rem;color:#991b1b;padding:0 2px">Needs: date of birth</div>
+      <div class="btn ghost" style="margin-top:auto">Re-check cards</div>
+    </div>`,
+  signin: () => `
+    <div class="scr-top">Say<i>$</i>o Wallet</div>
+    <div class="scr-body">
+      <div class="lbl">Your name</div><div class="fld filled">Luis Rios</div>
+      <div class="lbl">PIN</div><div class="fld focus">••••</div>
+      <div class="btn">Sign in</div>
+      <div style="font-size:.56rem;color:#8b93a1;text-align:center;margin-top:4px">saysocard.com/employee</div>
+    </div>`,
+  showcard: () => `
+    <div class="scr-top">Your card</div>
+    <div class="scr-body">
+      <div class="tile"><div class="sm">Available</div><div class="big">$500.00</div></div>
+      <div class="cardart">
+        <div class="nm">SaySo · Luis Rios</div>
+        <div class="num">5432&nbsp; 1098&nbsp; 7654&nbsp; 7270</div>
+      </div>
+      <div class="row" style="gap:7px">
+        <div class="fld filled" style="flex:1;font-size:.58rem">EXP 09/29</div>
+        <div class="fld filled" style="flex:1;font-size:.58rem">CVC 441</div>
+      </div>
+      <div class="btn ghost">Show card details</div>
+    </div>`,
+  addwallet: () => `
+    <div class="wallet-hdr"><span>Wallet</span><span style="font-size:.9rem">+</span></div>
+    <div class="scr-body" style="padding-top:9px">
+      <div class="menu-item" style="border-radius:7px">Debit or Credit Card <span style="color:#b6bcc7">›</span></div>
+      <div class="menu-item hl" style="border-radius:7px">Enter Card Details Manually <span style="color:var(--amber)">›</span></div>
+      <div class="lbl" style="margin-top:6px">Card number</div>
+      <div class="fld focus">5432 1098 7654 7270</div>
+      <div class="row" style="gap:7px">
+        <div class="fld filled" style="flex:1;font-size:.58rem">09/29</div>
+        <div class="fld filled" style="flex:1;font-size:.58rem">441</div>
+      </div>
+      <div class="btn" style="margin-top:auto">Next</div>
+    </div>`,
+  otp: () => `
+    <div class="wallet-hdr"><span>Verify your card</span></div>
+    <div class="scr-body" style="justify-content:center;gap:12px">
+      <div style="text-align:center;font-size:.63rem;color:#5b6270;line-height:1.5">
+        Enter the 6-digit code sent to<br><b style="color:#1a1a2e">(575) •••-0884</b>
+      </div>
+      <div class="otp"><span>4</span><span>0</span><span>2</span><span>7</span><span class="pulse">•</span><span></span></div>
+      <div class="btn" style="margin-top:6px">Verify</div>
+      <div style="text-align:center;font-size:.55rem;color:#8b93a1">Didn't get it? Send again</div>
+    </div>`,
+  pay: () => `
+    <div class="scr-top" style="background:#0d0f14;color:#fff;border-bottom-color:#20242d">Hold near reader</div>
+    <div class="scr-body" style="background:#0d0f14;align-items:center;justify-content:center;gap:16px;position:relative">
+      <div class="cardart" style="width:100%;min-height:78px">
+        <div class="nm">SaySo · Luis Rios</div>
+        <div class="num">•••• &nbsp;•••• &nbsp;•••• &nbsp;7270</div>
+      </div>
+      <div style="width:52px;height:52px;border-radius:26px;border:2px solid var(--amber);
+        display:flex;align-items:center;justify-content:center;position:relative">
+        <div class="tap tapgo" style="opacity:1;width:52px;height:52px;border-radius:26px;position:absolute"></div>
+        <span style="color:var(--amber);font-size:1.1rem">((•))</span>
+      </div>
+      <div style="color:#9aa2af;font-size:.6rem">Permian Parts &amp; Supply</div>
+      <div style="color:#fff;font-weight:800;font-size:1.05rem">$84.20</div>
+    </div>`,
+  trouble: () => `
+    <div class="scr-top">Your card</div>
+    <div class="scr-body">
+      <div class="tile"><div class="sm">Card status</div>
+        <div style="margin-top:5px"><span class="chip bad">Locked</span></div></div>
+      <div style="background:#fdeeec;border:1px solid #f3c6c0;border-radius:8px;padding:9px;
+        font-size:.58rem;color:#8c2f22;line-height:1.5">
+        Your card is locked until the card issuer has your <b>date of birth</b>.
+      </div>
+      <div class="lbl">Date of birth</div><div class="fld focus pulse">MM / DD / YYYY</div>
+      <div class="btn amber">Unlock my card</div>
+    </div>`
+};
+
+/* ------------------------------------------------------------------ */
+let lang = "en", track = "owner", idx = 0, playing = true, timer = null;
+
+function t(k){ return UI[lang][k]; }
+
+function paintStatic(){
+  document.querySelectorAll("[data-t]").forEach(el => {
+    const v = UI[lang][el.dataset.t];
+    if (typeof v === "string") el.textContent = v;
+  });
+  document.documentElement.lang = lang;
+  document.getElementById("btn-en").setAttribute("aria-pressed", lang === "en");
+  document.getElementById("btn-es").setAttribute("aria-pressed", lang === "es");
+  document.getElementById("tr-owner").setAttribute("aria-pressed", track === "owner");
+  document.getElementById("tr-crew").setAttribute("aria-pressed", track === "crew");
+  document.getElementById("play").textContent = playing ? t("pause") : t("play");
+}
+
+function paint(){
+  const steps = STEPS[track];
+  const s = steps[idx], c = s[lang];
+
+  document.getElementById("sNum").textContent = idx + 1;
+  document.getElementById("sOf").textContent = UI[lang].of(idx + 1, steps.length);
+  document.getElementById("sTitle").textContent = c.t;
+  document.getElementById("sLede").innerHTML = c.l;
+
+  const pts = document.getElementById("sPts");
+  pts.innerHTML = "";
+  (c.p || []).forEach(x => { const li = document.createElement("li"); li.innerHTML = x; pts.appendChild(li); });
+
+  const note = document.getElementById("sNote");
+  if (c.n) { note.style.display = "block"; note.innerHTML = c.n; note.className = "note" + (/not work|no sirve|no funciona|nunca es culpa/.test(c.n) ? " warn" : ""); }
+  else note.style.display = "none";
+
+  const scr = document.getElementById("screen");
+  scr.innerHTML = (VIZ[s.viz] || (() => ""))();
+  scr.classList.remove("fade"); void scr.offsetWidth; scr.classList.add("fade");
+
+  document.getElementById("bar").style.width = ((idx + 1) / steps.length * 100) + "%";
+  document.getElementById("prev").disabled = idx === 0;
+  document.getElementById("next").textContent = idx === steps.length - 1 ? t("done") : t("next");
+
+  const dots = document.getElementById("dots");
+  dots.innerHTML = "";
+  steps.forEach((_, i) => {
+    const d = document.createElement("i");
+    if (i === idx) d.className = "on";
+    d.onclick = () => { idx = i; stop(); paint(); };
+    dots.appendChild(d);
+  });
+}
+
+function go(n){
+  const steps = STEPS[track];
+  idx = (idx + n + steps.length) % steps.length;
+  paint();
+}
+function tick(){ if (playing) go(1); }
+function start(){ stop(); timer = setInterval(tick, 7000); playing = true; paintStatic(); }
+function stop(){ if (timer) clearInterval(timer); timer = null; playing = false; paintStatic(); }
+function togglePlay(){ playing ? stop() : start(); }
+
+function setLang(l){ lang = l; try { localStorage } catch(e){} paintStatic(); paint(); }
+function setTrack(tr){ track = tr; idx = 0; paintStatic(); paint(); }
+
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowRight") { stop(); go(1); }
+  if (e.key === "ArrowLeft") { stop(); go(-1); }
+});
+
+// Default to the crew track when someone arrives from the wallet page.
+if (location.hash === "#crew" || /employee/.test(document.referrer)) track = "crew";
+// Default to Spanish if the browser is set to Spanish.
+if ((navigator.language || "").toLowerCase().startsWith("es")) lang = "es";
+
+paintStatic(); paint(); start();
+</script>
+</body>
+</html>

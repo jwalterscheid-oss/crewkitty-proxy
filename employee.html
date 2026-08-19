@@ -52,6 +52,9 @@
       <input id="act-email" type="email" autocomplete="email" placeholder="you@example.com">
       <label>Your mobile number</label>
       <input id="act-phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="(555) 123-4567">
+      <label>Your date of birth <span style="font-weight:400;color:#666">/ Fecha de nacimiento</span></label>
+      <input id="act-dob" type="date" autocomplete="bday" max="2010-01-01">
+      <div class="bal-label" style="margin-top:6px">The bank that issues the card uses this to verify who you are. Without it your card stays locked and will not work.</div>
       <label style="font-weight:400;display:flex;gap:10px;align-items:flex-start;margin-top:16px">
         <input type="checkbox" id="act-agree" style="width:auto;margin-top:3px">
         <span style="font-size:.85rem">I agree to the <a href="https://stripe.com/legal/issuing/crb-authorized-user-terms" target="_blank">Cross River Bank Authorized User Terms</a> and <a href="https://stripe.com/legal/e-sign-disclosure" target="_blank">E-sign policy</a>.</span>
@@ -59,9 +62,20 @@
       <button id="activateBtn" onclick="activate()">Activate my card</button>
       <div class="err" id="actErr"></div>
     </div>
+    <div class="card" id="verifyCard" style="display:none;border-top:3px solid #f5a623">
+      <label style="margin-top:0">Finish verifying your identity</label>
+      <div class="bal-label" id="verifyWhy" style="margin-bottom:10px"></div>
+      <label>Your date of birth <span style="font-weight:400;color:#666">/ Fecha de nacimiento</span></label>
+      <input id="ver-dob" type="date" autocomplete="bday" max="2010-01-01">
+      <button id="verifyBtn" onclick="verifyIdentity()">Unlock my card</button>
+      <div class="err" id="verErr"></div>
+    </div>
+
     <div class="card" id="applePayCard" style="display:none">
       <label>Add card to Apple Pay / Google Pay</label>
-      <div class="bal-label" style="margin-bottom:10px">Tap "Show card details", then on your phone open the <b>Wallet</b> app &rarr; <b>+</b> &rarr; <b>Add Card</b> &rarr; <b>Enter Card Details Manually</b>, and type the number, expiry, and CVC shown below.</div>
+      <div class="bal-label" style="margin-bottom:10px">Tap "Show card details", then on your phone open the <b>Wallet</b> app &rarr; <b>+</b> &rarr; <b>Add Card</b> &rarr; <b>Enter Card Details Manually</b>, and type the number, expiry, and CVC shown below. You will get a 6-digit code by text or email to confirm it.</div>
+      <div class="bal-label" style="margin-bottom:10px;color:#888">Toca "Show card details", luego abre la app <b>Wallet</b> en tu teléfono &rarr; <b>+</b> &rarr; <b>Agregar tarjeta</b> &rarr; <b>Ingresar datos manualmente</b>, y escribe el número, la fecha y el CVC. Recibirás un código de 6 dígitos por mensaje o correo.</div>
+      <div class="bal-label" style="margin-bottom:10px"><a href="/guide" target="_blank" style="color:#635bff;font-weight:600">Step-by-step walkthrough / Guía paso a paso &rarr;</a></div>
       <button id="showCardBtn" onclick="showCard()">Show card details</button>
       <div id="cardDetails" style="display:none;margin-top:14px">
         <div class="bal-label">Card number</div>
@@ -136,8 +150,17 @@ function refresh(data) {
   document.getElementById('bal').textContent = fmt(data.balanceCents);
   document.getElementById('cardline').textContent = data.cardLast4 ? 'Company card \u2022\u2022\u2022\u2022 ' + data.cardLast4 : (data.needsActivation ? 'Activate below to get your card' : 'No card issued yet \u2014 ask your admin');
   CARDID = data.cardId || '';
-  document.getElementById('applePayCard').style.display = CARDID ? 'block' : 'none';
+  const locked = !!CARDID && data.cardActive === false;
+  document.getElementById('applePayCard').style.display = (CARDID && !locked) ? 'block' : 'none';
   document.getElementById('activateCard').style.display = data.needsActivation ? 'block' : 'none';
+  const vc = document.getElementById('verifyCard');
+  vc.style.display = locked ? 'block' : 'none';
+  if (locked) {
+    document.getElementById('verifyWhy').textContent = data.cardBlocker
+      ? data.cardBlocker + ' Add it below and your card unlocks right away.'
+      : 'Your card is not active yet. The card issuer is still checking your details — adding your date of birth usually clears it immediately.';
+    document.getElementById('cardline').textContent += ' — locked, see below';
+  }
   if (data.email) document.getElementById('act-email').value = data.email;
   if (data.phone) document.getElementById('act-phone').value = data.phone;
   const txs = document.getElementById('txs');
@@ -151,6 +174,23 @@ function refresh(data) {
   });
 }
 
+async function verifyIdentity() {
+  const err = document.getElementById('verErr'); err.textContent = '';
+  const btn = document.getElementById('verifyBtn');
+  btn.disabled = true; btn.textContent = 'Checking\u2026';
+  try {
+    const res = await fetch(P+'/api/employee/verify-identity', {
+      method: 'POST', headers: H(),
+      body: JSON.stringify({ dob: document.getElementById('ver-dob').value })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not verify');
+    refresh(data);
+    if (data.cardActive) err.className = 'ok', err.textContent = 'Card unlocked \u2014 you can add it to your phone wallet now.';
+  } catch (e) { err.className = 'err'; err.textContent = e.message; }
+  btn.disabled = false; btn.textContent = 'Unlock my card';
+}
+
 async function activate() {
   const err = document.getElementById('actErr'); err.textContent = '';
   const btn = document.getElementById('activateBtn');
@@ -161,6 +201,7 @@ async function activate() {
       body: JSON.stringify({
         email: document.getElementById('act-email').value,
         phone: document.getElementById('act-phone').value,
+        dob: document.getElementById('act-dob').value,
         agree: document.getElementById('act-agree').checked
       })
     });
@@ -250,7 +291,7 @@ async function ckSend(){
   try {
     const res = await fetch('/api/support/chat', { method:'POST', headers: ckAuth(), body: JSON.stringify({ messages: CK_HIST.slice(-12) }) });
     const d = await res.json();
-    t.textContent = d.reply || d.error || 'Something went wrong — email jwalterscheid@jaoilfieldservices.com';
+    t.textContent = d.reply || d.error || 'Something went wrong — email saysosupport@gmail.com';
     CK_HIST.push({role:'assistant', content:t.textContent});
   } catch (e) { t.textContent = 'Connection trouble — try again in a moment.'; }
 }

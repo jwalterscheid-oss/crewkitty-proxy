@@ -76,6 +76,17 @@
       </table>
     </div>
 
+    <div class="card" id="setupCard">
+      <h2 style="font-size:1.1rem">Setup &amp; training</h2>
+      <div class="msg" style="margin-top:6px">New here? Walk through the whole setup in a few minutes, in English or Spanish. Share the crew guide with your hands — it covers activating a card and adding it to a phone.</div>
+      <div id="setupSteps" style="margin-top:16px"></div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:18px">
+        <a href="/guide" target="_blank"><button type="button" style="margin-top:0">Open the walkthrough</button></a>
+        <a href="/guides/sayso-owner-guide.pdf" download><button type="button" class="gray" style="margin-top:0">Download owner guide (PDF)</button></a>
+        <a href="/guides/sayso-crew-guide.pdf" download><button type="button" class="gray" style="margin-top:0">Download crew guide (PDF)</button></a>
+      </div>
+    </div>
+
     <div class="card" id="walletCard">
       <h2 style="font-size:1.1rem">Company wallet</h2>
       <div class="msg" id="walletInfo">Loading…</div>
@@ -115,7 +126,10 @@
         <thead><tr><th>Employee</th><th>Card</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody id="erows"></tbody>
       </table>
-      <div class="msg">Employees sign in at <a href="/employee" target="_blank">the wallet page</a> with their name + PIN.</div>
+      <div class="msg">Employees sign in at <a href="/employee" target="_blank">the wallet page</a> with their name + PIN.
+        <button type="button" class="small gray" style="margin-left:8px" onclick="recheckCards()">Re-check cards with the issuer</button>
+        <span id="recheckMsg"></span>
+      </div>
     </div>
 
     <div class="card" id="approvalsCard">
@@ -228,11 +242,15 @@ async function decideApproval(id, action) {
   loadApprovals();
 }
 
+let SETUP = { dash: null, emps: null, merchants: null };
+function syncSetup() { renderSetupSteps(SETUP.dash, SETUP.emps, SETUP.merchants); }
+
 async function loadDashboard() {
   try {
     const res = await fetch(P+'/api/admin/dashboard', { headers: H() });
     const d = await res.json();
     if (!res.ok) return;
+    SETUP.dash = d; syncSetup();
     document.getElementById('dWallet').textContent = fmt(d.walletCents);
     document.getElementById('dOnCards').textContent = fmt(d.onCardsCents);
     document.getElementById('dCards').textContent = d.activeCards;
@@ -313,6 +331,8 @@ async function signup() {
   document.getElementById('lpw').value = document.getElementById('spw').value;
   msg.textContent = 'Account created! Signing you in…';
   await unlock();
+  FIRST_RUN = true;
+  showFirstRun();
   // First-run funding: send the new company straight to Stripe to connect
   // their bank and load their starting balance.
   const sf = parseFloat(document.getElementById('sf').value);
@@ -322,6 +342,24 @@ async function signup() {
     const fd = await fres.json();
     if (fres.ok && fd.url) { location.href = fd.url; return; }
   }
+}
+
+// A brand-new company gets pointed at the walkthrough before anything else —
+// the setup order matters, and the identity step in particular is where cards
+// get stuck if it is skipped.
+let FIRST_RUN = false;
+function showFirstRun() {
+  const c = document.getElementById('setupCard');
+  if (!c) return;
+  c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (document.getElementById('firstRunBanner')) return;
+  const b = document.createElement('div');
+  b.id = 'firstRunBanner';
+  b.style.cssText = 'background:#fff8e8;border:1px solid #f3dfae;color:#6b4e0e;border-radius:9px;padding:13px 15px;margin-top:14px;font-size:.9rem;line-height:1.5';
+  b.innerHTML = '<b>Welcome to SaySo.</b> Start here — the walkthrough takes about four minutes and covers the order things have to happen in. '
+    + 'Pay attention to the step where your crew verify their identity: skip it and their cards stay locked and will not add to a phone. '
+    + '<br><span style="color:#8a5b00">Bienvenido a SaySo. Empieza aquí — la guía toma unos cuatro minutos.</span>';
+  c.querySelector('.msg').after(b);
 }
 
 // Shortfall helper: when a wallet doesn't have enough to load a card, offer
@@ -337,7 +375,9 @@ async function offerFunding(neededUsd) {
 
 async function refresh() {
   const res = await fetch(P+'/api/admin/merchants', { headers: H() });
-  render(await res.json());
+  const list = await res.json();
+  SETUP.merchants = list; syncSetup();
+  render(list);
 }
 
 function render(list) {
@@ -402,17 +442,62 @@ async function del(id) {
 
 const fmt = c => '$' + (c/100).toFixed(2);
 
+// A card that exists but is not active declines everywhere and will not add to
+// Apple Wallet or Google Pay, so say so plainly rather than just showing digits.
+function cardCell(e) {
+  if (!e.cardLast4) return '<span class="badge pend" title="Card is issued automatically when the employee signs in at the wallet page and confirms their info">Awaiting activation</span>';
+  const digits = '&bull;&bull;&bull;&bull; ' + e.cardLast4;
+  if (e.cardStatus === 'active') return digits + ' <span class="badge on">Active</span>';
+  if (e.cardStatus === 'canceled') return digits + ' <span class="badge off">Canceled</span>';
+  if (e.cardStatus === 'inactive') {
+    const why = e.cardBlocker ? esc(e.cardBlocker) : 'The card issuer is still checking this cardholder.';
+    return digits + ` <span class="badge off" title="${why}">Locked</span><br><small style="color:#991b1b">${why} The employee can supply it from the wallet page.</small>`;
+  }
+  return digits;
+}
+
+async function recheckCards() {
+  const m = document.getElementById('recheckMsg');
+  m.textContent = ' checking\u2026';
+  try {
+    const res = await fetch(P+'/api/admin/refresh-cards', { method: 'POST', headers: H() });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.error || 'Could not re-check');
+    const stuck = (d.cards || []).filter(c => c.blocker);
+    m.textContent = stuck.length ? ` ${stuck.length} card(s) still locked.` : ' all cards active.';
+  } catch (e) { m.textContent = ' ' + e.message; }
+  refreshEmployees();
+}
+
+// Setup checklist — derived from live state so it reflects what is actually done.
+function renderSetupSteps(d, emps, merchants) {
+  const done = s => `<span class="badge on">done</span>`;
+  const todo = `<span class="badge pend">to do</span>`;
+  const steps = [
+    ['Fund your company wallet', (d && d.walletCents > 0)],
+    ['Approve the businesses your crew can buy from', (merchants || []).length > 0],
+    ['Add your crew', (emps || []).length > 0],
+    ['Crew activate their cards and add them to their phones', (emps || []).some(e => e.cardStatus === 'active')]
+  ];
+  document.getElementById('setupSteps').innerHTML = steps.map((st, i) =>
+    `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f0f0f0">
+       <span style="width:22px;height:22px;border-radius:11px;background:${st[1] ? '#d1fae5' : '#f4f6f8'};color:${st[1] ? '#065f46' : '#666'};display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700">${i + 1}</span>
+       <span style="flex:1;font-size:.9rem">${st[0]}</span>${st[1] ? done() : todo}
+     </div>`).join('');
+}
+
 async function refreshEmployees() {
   const res = await fetch(P+'/api/admin/employees', { headers: H() });
   if (!res.ok) return;
   const list = await res.json();
+  SETUP.emps = list; syncSetup();
   const tb = document.getElementById('erows');
   tb.innerHTML = '';
   list.forEach(e => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><strong>${esc(e.name)}</strong></td>
-      <td>${e.cardLast4 ? '&bull;&bull;&bull;&bull; ' + e.cardLast4 : '<span class="badge pend" title="Card is issued automatically when the employee signs in at the wallet page and confirms their info">Awaiting activation</span>'}</td>
+      <td>${cardCell(e)}</td>
       <td>${fmt(e.balanceCents)}</td>
       <td><span class="badge ${e.active ? 'on' : 'off'}">${e.active ? 'Active' : 'Disabled'}</span></td>
       <td>
@@ -522,7 +607,7 @@ async function ckSend(){
   try {
     const res = await fetch('/api/support/chat', { method:'POST', headers: ckAuth(), body: JSON.stringify({ messages: CK_HIST.slice(-12) }) });
     const d = await res.json();
-    t.textContent = d.reply || d.error || 'Something went wrong — email jwalterscheid@jaoilfieldservices.com';
+    t.textContent = d.reply || d.error || 'Something went wrong — email saysosupport@gmail.com';
     CK_HIST.push({role:'assistant', content:t.textContent});
   } catch (e) { t.textContent = 'Connection trouble — try again in a moment.'; }
 }
